@@ -1,0 +1,54 @@
+# Python cache va kompilyatsiya qilingan fayllar
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Virtual muhit (venv)
+venv/
+env/
+.venv/
+
+# JetBrains IDE sozlamalari (PyCharm)
+.idea/
+
+# Maxfiy fayllar
+.env
+
+# Log fayllar
+*.log
+
+# Ma'lumotlar bazasi
+*.sqlite3
+*.db
+
+# OS tomonidan yaratilgan fayllar
+.DS_Store
+Thumbs.db
+
+# Testlar uchun ishlatiladigan vaqtinchalik fayllar
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Docker fayllari (agar ishlatilsa)
+docker-compose.override.yml
+
+# Jupyter Notebook (agar ishlatilsa)
+.ipynb_checkpoints/
+
+# Node.js (agar ishlatilsa)
+node_modules/
+npm-debug.log
+
+# Static va media fayllar (agar ishlatilsa)
+staticfiles/
+mediafiles/
+
+# Backup fayllar
+*.bak
+*.old
+
+# Har qanday foydalanuvchi tomonidan yaratiladigan vaqtinchalik fayllar
+for_testing/
