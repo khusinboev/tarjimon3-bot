@@ -1,3 +1,5 @@
+from aiogram.types import CallbackQuery
+
 from src.config import sql, db, dp, adminPanel, bot
 
 
@@ -45,23 +47,3 @@ class PanelFunc:
             except Exception as e:
                 str += f"Kanalni admin qiling\n\nError: {e}"
         return str
-
-
-    @staticmethod
-    async def forward_send_msg(chat_id: int, from_chat_id: int, message_id) -> int:
-        try:
-            await bot.forward_message(chat_id=chat_id, from_chat_id=from_chat_id, message_id=message_id)
-            return 1
-        except Exception as e:
-            print(e)
-        return 0
-
-
-    @staticmethod
-    async def send_message_chats(chat_id: int, from_chat_id: int, message_id) -> int:
-        try:
-            await bot.copy_media_group(chat_id=chat_id, from_chat_id=from_chat_id, message_id=message_id)
-            return 1
-        except Exception as e:
-            print(e)
-        return 0

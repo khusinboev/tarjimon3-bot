@@ -57,7 +57,7 @@ class AdminPanel:
         return admin_message
 
 
-class LanguageInline:
+class UserPanels:
     @staticmethod
     async def join_btn(user_id):
         sql.execute("SELECT chat_id FROM public.mandatorys")
@@ -74,6 +74,18 @@ class LanguageInline:
         return button
 
     @staticmethod
+    async def main_manu():
+        keyboard = types.ReplyKeyboardMarkup(
+            keyboard=[
+                [types.KeyboardButton(text="✅Tillarni tanlash"), types.KeyboardButton(text="⚙️Tillarni sozlash")],
+                [types.KeyboardButton(text="📑Yo'riqnoma"), types.KeyboardButton(text="️‼️Fikr bildirish")]
+            ],
+            resize_keyboard=True
+        )
+
+        return keyboard
+
+    @staticmethod
     async def langs_inline(user_id):
         # Foydalanuvchi tanlagan tillarni olish
         user_in, user_out = await Lang.user_langs(user_id)
@@ -83,7 +95,7 @@ class LanguageInline:
         tts = sql.fetchone()[0]
 
         # Barcha tillar roʻyxatini olish
-        lang_ins, lang_outs = await Lang.lang_list()
+        lang_ins, lang_outs = await Lang.lang_list_users(user_id)
 
         # Inline klaviaturalar yaratish
         langs_inline = []
@@ -99,5 +111,31 @@ class LanguageInline:
         tts_text = "✅TTS" if tts else "☑️TTS"
         langs_inline.append([InlineKeyboardButton(text=tts_text, callback_data="TTS")])
 
+        # Inline klaviaturalarni qaytarish
+        return InlineKeyboardMarkup(inline_keyboard=langs_inline)
+
+
+    @staticmethod
+    async def user_langs_inline(user_id):
+        sql.execute(f"""select langs from public.user_langs where user_id={user_id}""")
+        langs_read = [langs for langs in sql.fetchone()[0].split(", ")]
+        langs_read = ["_"+str(item) for item in langs_read]
+
+
+        # Barcha tillar roʻyxatini olish
+        langs, codes = await Lang.lang_list2()
+
+        # Inline klaviaturalar yaratish
+        langs_inline = []
+        ll = []
+        num = 0
+        for langs, code in zip(langs, codes):
+            num += 1
+            Nin = "✅" if code in langs_read else ""
+            ll.append(InlineKeyboardButton(text=f"{Nin}{langs}", callback_data=code))
+            if num == 2:
+                langs_inline.append(ll)
+                num = 0
+                ll = []
         # Inline klaviaturalarni qaytarish
         return InlineKeyboardMarkup(inline_keyboard=langs_inline)

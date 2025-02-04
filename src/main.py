@@ -7,8 +7,9 @@ from aiogram.loggers import middlewares
 from aiogram.types import *#ChatMemberUpdated, ChatMember,
 
 from config import dp, bot, adminStart
+from src.buttons.function import Lang
 from src.database.functions import create_all_base
-from user_handlers import start_handler, middleware
+from user_handlers import start_handler, middleware, tarjima
 from admin_handlers import panel
 
 router = Router()
@@ -42,6 +43,7 @@ async def main() -> None:
     dp.include_router(start_handler.router)
     dp.include_router(panel.router)
     dp.include_router(middleware.router)
+    dp.include_router(tarjima.router)
     await dp.start_polling(bot)
 
 

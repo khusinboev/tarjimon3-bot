@@ -42,7 +42,7 @@ async def create_all_base():
 (
     chat_id bigint NOT NULL,
     in_lang character varying(25) NOT NULL DEFAULT 'uz',
-    out_lang character varying(25) NOT NULL DEFAULT 'en',
+    out_lang character varying NOT NULL DEFAULT 'en',
     CONSTRAINT group_langs_pkey PRIMARY KEY (chat_id)
 )""")
     db.commit()
@@ -60,6 +60,7 @@ async def create_all_base():
     user_id bigint NOT NULL,
     in_lang character varying(25) NOT NULL DEFAULT 'uz',
     out_lang character varying(25) NOT NULL DEFAULT 'en',
+    langs character varying(25) NOT NULL DEFAULT 'all',
     CONSTRAINT user_langs_pkey PRIMARY KEY (user_id)
 )""")
     db.commit()
