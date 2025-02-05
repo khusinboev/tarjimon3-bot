@@ -1,10 +1,9 @@
 from aiogram import Router
-from aiogram.enums import ChatAction
 from aiogram.filters import CommandStart
 from aiogram.types import Message, CallbackQuery
 from aiogram.enums import ChatAction, ChatType
 
-from src.config import bot, sql, adminStart
+from config import bot, sql, adminStart
 from src.database.functions import Authenticator
 from src.functions.functions import CheckData
 from src.buttons.buttons import UserPanels

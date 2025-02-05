@@ -1,6 +1,6 @@
 from aiogram.types import CallbackQuery
 
-from src.config import sql, db
+from config import sql, db
 
 
 class Lang:

@@ -1,6 +1,4 @@
-from aiogram.types import CallbackQuery
-
-from src.config import sql, db, dp, adminPanel, bot
+from config import sql, db, adminPanel, bot
 
 
 class CheckData:

@@ -1,11 +1,11 @@
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
-from aiogram.enums import ChatType, ContentType
+from aiogram.enums import ChatType
 from aiogram.fsm.state import StatesGroup, State
 
 from src.buttons.buttons import AdminPanel
-from src.config import adminPanel, sql, bot, adminStart, dp
+from config import sql
 from src.functions.functions import PanelFunc
 
 router = Router()

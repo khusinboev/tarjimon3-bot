@@ -1,8 +1,6 @@
-import datetime
 from aiogram import types
-import pytz
 
-from src.config import db, sql
+from config import db, sql
 
 
 async def create_all_base():
@@ -60,7 +58,7 @@ async def create_all_base():
     user_id bigint NOT NULL,
     in_lang character varying(25) NOT NULL DEFAULT 'uz',
     out_lang character varying(25) NOT NULL DEFAULT 'en',
-    langs character varying(25) NOT NULL DEFAULT 'all',
+    langs TEXT NOT NULL DEFAULT 'all',
     CONSTRAINT user_langs_pkey PRIMARY KEY (user_id)
 )""")
     db.commit()

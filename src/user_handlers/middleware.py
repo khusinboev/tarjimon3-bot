@@ -1,15 +1,10 @@
 from aiogram import Router, F
 from aiogram.enums import ChatType, ChatAction
 from aiogram.types import Message, CallbackQuery
-from aiogram.exceptions import TelegramBadRequest
-
-import asyncio
-import logging
 
 from src.buttons.function import Lang
-from src.config import bot, sql, adminStart, db
+from config import bot, sql, adminStart, db
 from src.database.functions import Authenticator
-from src.functions.functions import CheckData, PanelFunc
 from src.buttons.buttons import UserPanels
 
 router = Router()
@@ -34,17 +29,12 @@ def call_filter():
 @router.callback_query(F.data.in_(call_filter()))  # F.filteri ishlatiladi
 async def check(call: CallbackQuery):
     user_id = call.from_user.id
-    try:
-        await call.answer()
-    except Exception as e:
-        logging.error(f"Callback answer error: {e}")
+    try:await call.answer()
+    except: pass
 
     try:
         await Lang.user_lang_check(call)
         await call.message.edit_reply_markup(reply_markup=await UserPanels.langs_inline(user_id))
-    except TelegramBadRequest as e:
-        if "message is not modified" not in str(e):
-            logging.error(f"Error editing message: {e}")
     except Exception as e:
         await bot.send_message(chat_id=adminStart, text=f"Error in edit: \n\n{e}\n\n\n{call.from_user}")
 
@@ -61,7 +51,6 @@ async def exchange_lang(call: CallbackQuery):
             sql.execute(f"UPDATE public.user_langs SET out_lang = '{in_lang}', in_lang = '{out_lang}' WHERE user_id='{user_id}'")
             db.commit()
     except Exception as e:
-        logging.error(f"Error exchanging languages: {e}")
         await bot.send_message(chat_id=adminStart, text=f"Error in exchangeLang: \n\n{e}\n\n\n{call.from_user}")
 
 # Til ro'yxatini ko'rsatish handleri
@@ -73,7 +62,6 @@ async def show_lang_list(call: CallbackQuery):
         await Authenticator.auth_user(call.message)
         await call.message.answer("Choose languages", reply_markup=await UserPanels.langs_inline(call.from_user.id))
     except Exception as e:
-        logging.error(f"Error showing language list: {e}")
         await bot.send_message(chat_id=adminStart, text=f"Error in lang_list: \n\n{e}\n\n\n{call.from_user}")
 
 
@@ -86,27 +74,21 @@ async def lang_set(message: Message) -> None:
 def lang_filter():
     sql.execute(f"""select code from public.langs_list""")
     code = ["_" + str(item[0]) for item in sql.fetchall()]
-    print(code)
     return code
 
 # Til kodlarini tekshirish handleri
 @router.callback_query(F.data.in_(lang_filter()))  # F.filteri ishlatiladi
 async def check(call: CallbackQuery):
     await call.answer()
-    print(call.data)
     user_id = call.from_user.id
     try:await call.answer()
     except: pass
-
-    # try:
     await Lang.user_lang_update(call)
-    await call.message.edit_reply_markup(reply_markup=await UserPanels.user_langs_inline(user_id))
-    # except TelegramBadRequest as e:
-    #     if "message is not modified" not in str(e):
-    #         logging.error(f"Error editing message: {e}")
-    # except Exception as e:
-    #     await bot.send_message(chat_id=adminStart, text=f"Error in edit: \n\n{e}\n\n\n{call.from_user}")
+    try:await call.message.edit_reply_markup(reply_markup=await UserPanels.user_langs_inline(user_id))
+    except:pass
 
-@router.callback_query()  # F.filteri ishlatiladi
-async def check(call: CallbackQuery):
-    await call.answer()
+# @router.callback_query()  # F.filteri ishlatiladi
+# async def check(call: CallbackQuery):
+#     await call.answer()
+
+

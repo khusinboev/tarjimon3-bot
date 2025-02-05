@@ -1,4 +1,4 @@
-import asyncio
+import asyncio, os
 import logging
 import sys
 
@@ -6,11 +6,10 @@ from aiogram import Router
 from aiogram.loggers import middlewares
 from aiogram.types import *#ChatMemberUpdated, ChatMember,
 
-from config import dp, bot, adminStart
-from src.buttons.function import Lang
+from config import dp, bot, adminStart, BASE_DIR
 from src.database.functions import create_all_base
-from user_handlers import start_handler, middleware, tarjima
-from admin_handlers import panel
+from src.user_handlers import start_handler, middleware, tarjima
+from src.admin_handlers import panel
 
 router = Router()
 
@@ -23,14 +22,13 @@ async def my_chat_handler(update: ChatMemberUpdated):
 
 async def on_startup() -> None:
     logging.info("Bot muvaffaqiyatli ishga tushirildi.")
-    # await bot.send_message(chat_id=adminStart, text="Successful. Bot started!")
-    # if not os.path.exists(BASE_DIR + "Audios"):
-    #     os.makedirs(BASE_DIR + "Audios")
-    # if not os.path.exists(BASE_DIR + "photos"):
-    #     os.makedirs(BASE_DIR + "photos")
-    # if not os.path.exists(BASE_DIR + "audio_tr"):
-    #     os.makedirs(BASE_DIR + "audio_tr")
-    # print(await bot.get_me())
+    await bot.send_message(chat_id=adminStart, text="Successful. Bot started!")
+    if not os.path.exists(BASE_DIR + "Audios"):
+        os.makedirs(BASE_DIR + "Audios")
+    if not os.path.exists(BASE_DIR + "photos"):
+        os.makedirs(BASE_DIR + "photos")
+    if not os.path.exists(BASE_DIR + "audio_tr"):
+        os.makedirs(BASE_DIR + "audio_tr")
     await create_all_base()
 
 

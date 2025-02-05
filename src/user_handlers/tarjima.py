@@ -1,8 +1,9 @@
+from pathlib import Path
+
 from aiogram import Router, Bot, F
 from aiogram.enums import ChatAction
-from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, ContentType
+from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, ContentType, FSInputFile
 from aiogram.filters import Command
-from aiogram.utils.chat_action import ChatActionSender
 from deep_translator import GoogleTranslator
 from pydub import AudioSegment
 from gtts import gTTS
@@ -10,7 +11,7 @@ import speech_recognition as sr
 import os
 
 from src.buttons.buttons import UserPanels
-from src.config import sql, adminPanel, adminStart
+from config import sql, adminPanel, adminStart, BASE_DIR
 from src.database.functions import Authenticator
 from src.functions.functions import CheckData
 
@@ -58,13 +59,14 @@ async def translator(message: Message, bot: Bot):
             elif len(trText) < 4096:
                 if tts:
                     try:
-                        audio_path = f"Audios/{user_id}.mp3"
+                        print("indi bera")
+                        audio_path = Path(BASE_DIR)/"Audios"/f"{user_id}.mp3"
                         tts = gTTS(text=trText, lang=lang_out)
                         tts.save(audio_path)
 
-                        await message.answer_audio(audio=audio_path, caption=f"<code>{trText}</code>",
-                                                   parse_mode="html", reply_markup=exchangeLang)
-                    except:
+                        await message.answer_audio(audio=FSInputFile(audio_path), caption=f"<code>{trText}</code>", parse_mode="html", reply_markup=exchangeLang)
+                    except Exception as e:
+                        print(e)
                         await message.answer(text=f"<code>{trText}</code>", parse_mode="html", reply_markup=exchangeLang)
                 else:
                     await message.answer(text=f"<code>{trText}</code>", parse_mode="html", reply_markup=exchangeLang)
@@ -73,14 +75,15 @@ async def translator(message: Message, bot: Bot):
                 fT = " ".join(num[:(len(num) // 2)])
                 tT = " ".join(num[(len(num) // 2):])
                 try:
-                    audio_path = f"Audios/{user_id}.mp3"
+                    audio_path = BASE_DIR+f"Audios/{user_id}.mp3"
                     tts = gTTS(text=trText, lang=lang_out)
                     tts.save(audio_path)
 
-                    await message.answer_audio(audio_path, caption=f"<code>{fT}</code>",
+                    await message.answer_audio(audio=FSInputFile(audio_path), caption=f"<code>{fT}</code>",
                                                parse_mode="html", reply_markup=exchangeLang)
                     await message.answer(text=f"<code>{tT}</code>", parse_mode="html", reply_markup=exchangeLang)
-                except:
+                except Exception as e:
+                    print(e)
                     await message.answer(text=f"<code>{fT}</code>", parse_mode="html", reply_markup=exchangeLang)
                     await message.answer(text=f"<code>{tT}</code>", parse_mode="html", reply_markup=exchangeLang)
         else:
@@ -112,7 +115,7 @@ async def audio_tr(message: Message, bot: Bot):
     file_info = await bot.get_file(file_id)
     file_path = file_info.file_path
     downloaded_file = await bot.download_file(file_path)
-    temp_file_path = f"{file_name}.{file_format}"
+    temp_file_path = BASE_DIR+f"{file_name}.{file_format}"
 
     with open(temp_file_path, "wb") as new_file:
         new_file.write(downloaded_file.read())
@@ -122,7 +125,7 @@ async def audio_tr(message: Message, bot: Bot):
     else:
         audio = AudioSegment.from_file(temp_file_path)
 
-    audio_name = f"audio_tr/{file_name}.wav"
+    audio_name = BASE_DIR+f"audio_tr/{file_name}.wav"
     audio.export(audio_name, format="wav")
     os.remove(temp_file_path)
 

@@ -1,7 +1,7 @@
 from aiogram import types
 from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardButton, KeyboardButton, InlineKeyboardMarkup
 
-from src.config import sql, dp
+from config import sql, dp
 from .function import Lang
 
 
