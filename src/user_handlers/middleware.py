@@ -17,10 +17,10 @@ async def command_start_handler(message: Message) -> None:
     await message.answer("Tillar / Languages", reply_markup=await UserPanels.langs_inline(user_id))
 
 # Bazadan til kodlarini olish funksiyasi
+sql.execute("SELECT lang_in FROM langs_list")
 def call_filter():
-    sql.execute("SELECT lang_in FROM public.langs_list")
+    sql.execute("SELECT lang_out FROM langs_list")
     lang_ins = [item[0] for item in sql.fetchall()]
-    sql.execute("SELECT lang_out FROM public.langs_list")
     lang_outs = [item[0] for item in sql.fetchall()]
     lang_outs.append("TTS")
     return lang_ins + lang_outs
@@ -42,13 +42,13 @@ async def check(call: CallbackQuery):
 @router.callback_query(F.data == "exchangeLang")  # F.filteri ishlatiladi
 async def exchange_lang(call: CallbackQuery):
     user_id = call.from_user.id
+    sql.execute(f"SELECT in_lang, out_lang FROM user_langs WHERE user_id='{user_id}'")
     try:
-        sql.execute(f"SELECT in_lang, out_lang FROM public.user_langs WHERE user_id='{user_id}'")
         codes = sql.fetchone()
         if codes:
             in_lang, out_lang = codes
+            sql.execute(f"UPDATE user_langs SET out_lang = '{in_lang}', in_lang = '{out_lang}' WHERE user_id='{user_id}'")
             await call.answer(f"{out_lang} --> {in_lang}")
-            sql.execute(f"UPDATE public.user_langs SET out_lang = '{in_lang}', in_lang = '{out_lang}' WHERE user_id='{user_id}'")
             db.commit()
     except Exception as e:
         await bot.send_message(chat_id=adminStart, text=f"Error in exchangeLang: \n\n{e}\n\n\n{call.from_user}")
@@ -71,8 +71,8 @@ async def lang_set(message: Message) -> None:
     user_id = message.from_user.id
     await message.answer("Tillar / Languages", reply_markup=await UserPanels.user_langs_inline(user_id))
 
+sql.execute(f"""select code from langs_list""")
 def lang_filter():
-    sql.execute(f"""select code from public.langs_list""")
     code = ["_" + str(item[0]) for item in sql.fetchall()]
     return code
 
