@@ -14,12 +14,6 @@ from src.admin_handlers import panel
 router = Router()
 
 
-@router.my_chat_member()
-async def my_chat_handler(update: ChatMemberUpdated):
-    await update.answer("salom")
-    logging.info(update)
-
-
 async def on_startup() -> None:
     logging.info("Bot muvaffaqiyatli ishga tushirildi.")
     await bot.send_message(chat_id=adminStart, text="Successful. Bot started!")

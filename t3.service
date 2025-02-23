@@ -1,0 +1,17 @@
+[Unit]
+Description= bot
+After=syslog.target
+After=network.target
+
+[Service]
+Restart=always
+RestartSec=2s
+Type=simple
+User=root
+Group=root
+MemoryLimit=5G
+WorkingDirectory=/home/tarjimon3/tarjimon3-bot
+ExecStart=/home/tarjimon3/venv/bin/python /home/tarjimon3/tarjimon3-bot/main.py
+
+[Install]
+WantedBy=multi-user.target

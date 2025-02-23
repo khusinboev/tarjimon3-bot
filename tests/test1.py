@@ -1,3 +1,3 @@
-rr = ", ".join(["sd", "sda", "we"])
+text = " salom "
 
-print(rr)
+print(len(text.strip().split(" ")))

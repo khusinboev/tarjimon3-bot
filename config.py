@@ -1,4 +1,5 @@
 import psycopg2
+import sqlite3
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 import os
@@ -28,6 +29,8 @@ db = psycopg2.connect(
 db.autocommit = True
 sql = db.cursor()  # Connection database of Postgres
 
+conSql = sqlite3.connect(str(Path(__file__).resolve().parent)+"/src/database/dictionary.db")
+curSql = conSql.cursor()
 
 # apt-get update
 # apt-get install tesseract-ocr

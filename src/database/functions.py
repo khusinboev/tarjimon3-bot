@@ -1,6 +1,6 @@
 from aiogram import types
-
-from config import db, sql
+import asyncio
+from config import db, sql, conSql, curSql
 
 
 async def create_all_base():
@@ -239,3 +239,124 @@ class Authenticator:
         if check is None:
             sql.execute(f"""INSERT INTO groups (chat_id, types) VALUES ('{chat_id}', '{group_type}')""")
             db.commit()
+
+
+class DefinitionEn:
+    @staticmethod
+    async def defination_en(text):
+        curSql.execute("SELECT Word, Type, Description FROM definition WHERE Word = ? COLLATE NOCASE", (text,))
+        results = curSql.fetchall()
+        resultsList = []
+        # Natija mavjudligini tekshirish
+        if results:
+            res_text = ''
+            num = 0
+            for row in results:
+                word, word_type, word_description = row
+                res_text += f"<b>{word}</b><i>{'' if word_type == '()' else word_type}</i> - <code>{word_description}</code>\n\n"
+                num += 1
+            pr=len(res_text) // 4096
+            if pr == 0:
+                resultsList.append(res_text)
+            else:
+                res_text2 = ''
+                num2 = 0
+                for row in results:
+                    word, word_type, word_description = row
+                    res_text2 += f"<b>{word}</b><i>{'' if word_type == '()' else word_type}</i> - <code>{word_description}</code>\n\n"
+                    num2 += 1
+                    if num2 % (num//(pr+1)) == 0:
+                        resultsList.append(res_text2)
+                        res_text2 = ''
+        else: resultsList = [None]
+        return resultsList
+
+    @staticmethod
+    async def uzb_eng(text):
+        resultsList = []
+
+        curSql.execute("""SELECT "uzb", "eng" FROM "uzb_eng" WHERE "uzb" = ? COLLATE NOCASE""", (text,))
+        results = curSql.fetchall()
+
+        if not results:
+            curSql.execute("""SELECT "uzb", "eng" FROM "uzb_eng" WHERE "uzb" LIKE ? COLLATE NOCASE""", (text + '%',))
+            results = curSql.fetchall()
+
+        if not results:
+            curSql.execute("""SELECT "uzb", "eng" FROM "uzb_eng" WHERE "uzb" LIKE ? COLLATE NOCASE""",
+                           ('%' + text + '%',))
+            results = curSql.fetchall()
+
+        if results:
+            res_text = ''
+            for row in results:
+                uzb, eng = row
+                res_text += f"<b>{uzb}</b> - {eng}\n"
+
+            pr = len(res_text) // 4096
+            if pr == 0:
+                resultsList.append(res_text)
+            else:
+                res_text2 = ''
+                for i, row in enumerate(results):
+                    uzb, eng = row
+                    res_text2 += f"<b>{uzb}</b> - {eng}\n"
+                    if (i + 1) % (len(results) // (pr + 1)) == 0:
+                        resultsList.append(res_text2)
+                        res_text2 = ''
+
+                if res_text2:
+                    resultsList.append(res_text2)
+        else:
+            resultsList.append(None)
+
+        return resultsList
+
+    @staticmethod
+    async def eng_uzb(text):
+        resultsList = []
+
+        # 1-qadam: Ayni o'zini izlash
+        curSql.execute("""SELECT "eng", "pron", "uzb" FROM "eng_uzb" 
+                              WHERE "eng" = ? COLLATE NOCASE""", (text,))
+        results = curSql.fetchall()
+
+        # 2-qadam: Agar aniq natija topilmasa, boshlanishiga qarab izlash
+        if not results:
+            curSql.execute("""SELECT "eng", "pron", "uzb" FROM "eng_uzb" 
+                                  WHERE "eng" LIKE ? COLLATE NOCASE""", (text + '%',))
+            results = curSql.fetchall()
+
+        # 3-qadam: Agar boshlanishi ham topilmasa, ichida mavjudligini izlash
+        if not results:
+            curSql.execute("""SELECT "eng", "pron", "uzb" FROM "eng_uzb" 
+                                  WHERE "eng" LIKE ? COLLATE NOCASE""", ('%' + text + '%',))
+            results = curSql.fetchall()
+
+        # 4-qadam: Natijalarni qayta ishlash
+        if results:
+            res_text = ''
+            for row in results:
+                eng, pron, uzb = row
+                res_text += f"<b>{eng}</b> <i>{pron}</i> - {uzb}\n\n"
+
+            # 5-qadam: 4096 dan katta bo'lsa bo'lib yuborish
+            pr = len(res_text) // 4096
+            if pr == 0:
+                resultsList.append(res_text)
+            else:
+                res_text2 = ''
+                for i, row in enumerate(results):
+                    eng, pron, uzb = row
+                    res_text2 += f"<b>{eng}</b> <i>{pron}</i> - {uzb}\n\n"
+                    # Har bir bo'lakka teng taqsimlash
+                    if (i + 1) % (len(results) // (pr + 1)) == 0:
+                        resultsList.append(res_text2)
+                        res_text2 = ''
+
+                # Oxirgi bo'lakni ham qo'shish
+                if res_text2:
+                    resultsList.append(res_text2)
+        else:
+            resultsList.append(None)
+        return resultsList

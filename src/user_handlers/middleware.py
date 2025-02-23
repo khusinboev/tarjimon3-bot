@@ -17,10 +17,10 @@ async def command_start_handler(message: Message) -> None:
     await message.answer("Tillar / Languages", reply_markup=await UserPanels.langs_inline(user_id))
 
 # Bazadan til kodlarini olish funksiyasi
-sql.execute("SELECT lang_in FROM langs_list")
 def call_filter():
-    sql.execute("SELECT lang_out FROM langs_list")
+    sql.execute("SELECT lang_in FROM langs_list")
     lang_ins = [item[0] for item in sql.fetchall()]
+    sql.execute("SELECT lang_out FROM langs_list")
     lang_outs = [item[0] for item in sql.fetchall()]
     lang_outs.append("TTS")
     return lang_ins + lang_outs
@@ -71,8 +71,8 @@ async def lang_set(message: Message) -> None:
     user_id = message.from_user.id
     await message.answer("Tillar / Languages", reply_markup=await UserPanels.user_langs_inline(user_id))
 
-sql.execute(f"""select code from langs_list""")
 def lang_filter():
+    sql.execute(f"""select code from langs_list""")
     code = ["_" + str(item[0]) for item in sql.fetchall()]
     return code
 
@@ -87,8 +87,8 @@ async def check(call: CallbackQuery):
     try:await call.message.edit_reply_markup(reply_markup=await UserPanels.user_langs_inline(user_id))
     except:pass
 
+
 # @router.callback_query()  # F.filteri ishlatiladi
 # async def check(call: CallbackQuery):
 #     await call.answer()
-
-
+#     print(call.data)
