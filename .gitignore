@@ -18,13 +18,7 @@ env/
 # Log fayllar
 *.log
 
-# Ma'lumotlar bazasi
-*.sqlite3
-*.db
 
-# OS tomonidan yaratilgan fayllar
-.DS_Store
-Thumbs.db
 
 # Testlar uchun ishlatiladigan vaqtinchalik fayllar
 *.tmp
