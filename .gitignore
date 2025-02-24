@@ -19,9 +19,6 @@ env/
 *.log
 
 
-# OS tomonidan yaratilgan fayllar
-.DS_Store
-Thumbs.db
 
 # Testlar uchun ishlatiladigan vaqtinchalik fayllar
 *.tmp
