@@ -36,7 +36,8 @@ async def check(call: CallbackQuery):
         await Lang.user_lang_check(call)
         await call.message.edit_reply_markup(reply_markup=await UserPanels.langs_inline(user_id))
     except Exception as e:
-        await bot.send_message(chat_id=adminStart, text=f"Error in edit: \n\n{e}\n\n\n{call.from_user}")
+        pass
+        # await bot.send_message(chat_id=adminStart, text=f"Error in edit: \n\n{e}\n\n\n{call.from_user}")
 
 # Til almashtirish handleri
 @router.callback_query(F.data == "exchangeLang")  # F.filteri ishlatiladi
@@ -70,6 +71,21 @@ async def show_lang_list(call: CallbackQuery):
 async def lang_set(message: Message) -> None:
     user_id = message.from_user.id
     await message.answer("Tillar / Languages", reply_markup=await UserPanels.user_langs_inline(user_id))
+
+
+# TIL SOZLAMALARI // TILLARNI BELGILASH
+@router.message(F.text == "📑Yo'riqnoma", lambda message: message.chat.type == ChatType.PRIVATE)
+async def lang_set(message: Message) -> None:
+    user_id = message.from_user.id
+    await bot.copy_message(chat_id=user_id, from_chat_id=-1002499471134, message_id=2)
+
+
+# TIL SOZLAMALARI // TILLARNI BELGILASH
+@router.message(F.text == "️‼️Fikr bildirish", lambda message: message.chat.type == ChatType.PRIVATE)
+async def lang_set(message: Message) -> None:
+    user_id = message.from_user.id
+    await message.answer(text="https://t.me/translate_bot_chat")
+
 
 def lang_filter():
     sql.execute(f"""select code from langs_list""")
