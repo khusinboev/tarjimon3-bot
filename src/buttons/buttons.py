@@ -66,8 +66,9 @@ class UserPanels:
         title = 1
         for row in rows:
             all_details = await bot.get_chat(chat_id=row[0])
-            print(all_details)
-            url = all_details['invite_link']
+            url = all_details.invite_link
+            if not url:
+                url = await bot.export_chat_invite_link(row[0])
             join_inline.append([InlineKeyboardButton(text=f"{title} - kanal", url=url)])
             title += 1
         join_inline.append([InlineKeyboardButton(text="✅Obuna bo'ldim", callback_data="check")])
