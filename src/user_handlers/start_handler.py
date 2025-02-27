@@ -1,4 +1,4 @@
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import CommandStart
 from aiogram.types import Message, CallbackQuery
 from aiogram.enums import ChatAction, ChatType
@@ -17,20 +17,20 @@ async def command_start_handler(message: Message) -> None:
     # await bot.send_chat_action(chat_id=message.from_user.id, action=ChatAction.TYPING)
     sql.execute(f"""SELECT user_id FROM public.accounts WHERE user_id = {user_id}""")
     await Authenticator.auth_user(message)
-    # try:
-    if await CheckData.check_on_start(message.from_user.id):
-        await message.answer(
-            text="Xush kelibsiz\n\n\nWelcome to my bot", reply_markup=await UserPanels.main_manu())
-    else:
-        await message.answer(text="Botimizdan foydalanish uchun kanalimizga azo bo'ling"
-                                  "\nSubscribe to our channel to use our bot",
-                             reply_markup=await UserPanels.join_btn(user_id))
-    # except Exception as ex:
-    #     await bot.forward_message(chat_id=adminStart, from_chat_id=message.chat.id, message_id=message.message_id)
-    #     await bot.send_message(chat_id=adminStart, text=f"Error in start: \n\n{ex}")
+    try:
+        if await CheckData.check_on_start(message.from_user.id):
+            await message.answer(
+                text="Xush kelibsiz\n\n\nWelcome to my bot", reply_markup=await UserPanels.main_manu())
+        else:
+            await message.answer(text="Botimizdan foydalanish uchun kanalimizga azo bo'ling"
+                                      "\nSubscribe to our channel to use our bot",
+                                 reply_markup=await UserPanels.join_btn(user_id))
+    except Exception as ex:
+        await bot.forward_message(chat_id=adminStart, from_chat_id=message.chat.id, message_id=message.message_id)
+        await bot.send_message(chat_id=adminStart, text=f"Error in start: \n\n{ex}")
 
 
-@router.callback_query(lambda call: call.message.data == "check", lambda call: call.message.chat.type == ChatType.PRIVATE)
+@router.callback_query(F.data == "check", F.message.chat.type == "private")
 async def check(call: CallbackQuery):
     user_id = call.from_user.id
     try:
