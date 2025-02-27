@@ -33,15 +33,19 @@ async def command_start_handler(message: Message) -> None:
 @router.callback_query(F.data == "check", F.message.chat.type == "private")
 async def check(call: CallbackQuery):
     user_id = call.from_user.id
+    try: await call.answer()
+    except: pass
     try:
         if await CheckData.check_on_start(user_id):
-            await call.answer()
             await call.message.delete()
             await bot.send_message(chat_id=user_id, text="Choose languages", reply_markup=await UserPanels.main_manu())
         else:
-            await call.answer(show_alert=True,
+            try:
+                await call.answer(show_alert=True,
                               text="Botimizdan foydalanish uchun kanalimizga azo bo'ling"
                                    "\nSubscribe to our channel to use our bot")
+            except:
+                pass
     except Exception as e:
         await bot.forward_message(chat_id=adminStart, from_chat_id=call.message.chat.id, message_id=call.message.message_id)
         await bot.send_message(chat_id=adminStart, text=f"Error in check: \n\n{e}")

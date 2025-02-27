@@ -49,7 +49,11 @@ async def exchange_lang(call: CallbackQuery):
         if codes:
             in_lang, out_lang = codes
             sql.execute(f"UPDATE user_langs SET out_lang = '{in_lang}', in_lang = '{out_lang}' WHERE user_id='{user_id}'")
-            await call.answer(f"{out_lang} --> {in_lang}")
+
+            try:
+                await call.answer(f"{out_lang} --> {in_lang}")
+            except:
+                pass
             db.commit()
     except Exception as e:
         await bot.send_message(chat_id=adminStart, text=f"Error in exchangeLang: \n\n{e}\n\n\n{call.from_user}")
@@ -59,7 +63,10 @@ async def exchange_lang(call: CallbackQuery):
 async def show_lang_list(call: CallbackQuery):
     user_id = call.from_user.id
     try:
-        await call.answer()
+        try:
+            await call.answer()
+        except:
+            pass
         await bot.send_chat_action(chat_id=call.from_user.id, action=ChatAction.TYPING)  # ChatAction ishlatiladi
         await Authenticator.auth_user(call.message)
         await bot.send_message(chat_id=user_id, text="Choose languages", reply_markup=await UserPanels.langs_inline(call.from_user.id))
@@ -96,10 +103,10 @@ def lang_filter():
 # Til kodlarini tekshirish handleri
 @router.callback_query(F.data.in_(lang_filter()))  # F.filteri ishlatiladi
 async def check(call: CallbackQuery):
-    await call.answer()
     user_id = call.from_user.id
     try:await call.answer()
     except: pass
+
     await Lang.user_lang_update(call)
     try:await call.message.edit_reply_markup(reply_markup=await UserPanels.user_langs_inline(user_id))
     except:pass
