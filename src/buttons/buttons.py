@@ -66,6 +66,7 @@ class UserPanels:
         title = 1
         for row in rows:
             all_details = await bot.get_chat(chat_id=row[0])
+            print(all_details)
             url = all_details['invite_link']
             join_inline.append([InlineKeyboardButton(text=f"{title} - kanal", url=url)])
             title += 1
