@@ -61,8 +61,8 @@ async def exchange_lang(call: CallbackQuery):
 # Til ro'yxatini ko'rsatish handleri
 @router.callback_query(F.data == "lang_list")  # F.filteri ishlatiladi
 async def show_lang_list(call: CallbackQuery):
-    user_id = call.from_user.id
-    try:
+    # try:
+        user_id = call.from_user.id
         try:
             await call.answer("⏳ Processing...")
         except:
@@ -70,8 +70,8 @@ async def show_lang_list(call: CallbackQuery):
 
         await Authenticator.auth_user(call.message)
         await bot.send_message(chat_id=user_id, text="Choose languages", reply_markup=await UserPanels.langs_inline(call.from_user.id))
-    except Exception as e:
-        await bot.send_message(chat_id=adminStart, text=f"Error in lang_list: \n\n{e}\n\n\n{call.from_user}")
+    # except Exception as e:
+    #     await bot.send_message(chat_id=adminStart, text=f"Error in lang_list: \n\n{e}\n\n\n{call.from_user}")
 
 
 # TIL SOZLAMALARI // TILLARNI BELGILASH
