@@ -37,7 +37,7 @@ async def check(call: CallbackQuery):
         if await CheckData.check_on_start(user_id):
             await call.answer()
             await call.message.delete()
-            await call.message.answer(text="Choose languages", reply_markup=await UserPanels.main_manu())
+            await bot.send_message(chat_id=user_id, text="Choose languages", reply_markup=await UserPanels.main_manu())
         else:
             await call.answer(show_alert=True,
                               text="Botimizdan foydalanish uchun kanalimizga azo bo'ling"

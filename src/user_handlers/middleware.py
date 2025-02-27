@@ -57,11 +57,12 @@ async def exchange_lang(call: CallbackQuery):
 # Til ro'yxatini ko'rsatish handleri
 @router.callback_query(F.data == "lang_list")  # F.filteri ishlatiladi
 async def show_lang_list(call: CallbackQuery):
+    user_id = call.from_user.id
     try:
         await call.answer()
         await bot.send_chat_action(chat_id=call.from_user.id, action=ChatAction.TYPING)  # ChatAction ishlatiladi
         await Authenticator.auth_user(call.message)
-        await call.message.answer("Choose languages", reply_markup=await UserPanels.langs_inline(call.from_user.id))
+        await bot.send_message(chat_id=user_id, text="Choose languages", reply_markup=await UserPanels.langs_inline(call.from_user.id))
     except Exception as e:
         await bot.send_message(chat_id=adminStart, text=f"Error in lang_list: \n\n{e}\n\n\n{call.from_user}")
 
