@@ -1,7 +1,7 @@
 from aiogram import types
 from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardButton, KeyboardButton, InlineKeyboardMarkup
 
-from config import sql, dp
+from config import sql, dp, bot
 from .function import Lang
 
 
@@ -65,7 +65,7 @@ class UserPanels:
         join_inline = []
         title = 1
         for row in rows:
-            all_details = await dp.bot.get_chat(chat_id=row[0])
+            all_details = await bot.get_chat(chat_id=row[0])
             url = all_details['invite_link']
             join_inline.append([InlineKeyboardButton(text=f"{title} - kanal", url=url)])
             title += 1
