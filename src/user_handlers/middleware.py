@@ -64,10 +64,10 @@ async def show_lang_list(call: CallbackQuery):
     user_id = call.from_user.id
     try:
         try:
-            await call.answer()
+            await call.answer("⏳ Processing...")
         except:
             pass
-        await bot.send_chat_action(chat_id=call.from_user.id, action=ChatAction.TYPING)  # ChatAction ishlatiladi
+
         await Authenticator.auth_user(call.message)
         await bot.send_message(chat_id=user_id, text="Choose languages", reply_markup=await UserPanels.langs_inline(call.from_user.id))
     except Exception as e:

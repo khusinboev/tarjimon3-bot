@@ -123,6 +123,10 @@ async def translator(message: Message, bot: Bot):
 
 
 @router.message(F.content_type.in_([ContentType.VOICE, ContentType.AUDIO]), F.chat.type == "private")
+async def show_lang_list(message: Message, bot: Bot):
+    import asyncio
+    asyncio.create_task(audio_tr(message, bot))  # Asinxron vazifani fon jarayoniga o'tkazish
+
 async def audio_tr(message: Message, bot: Bot):
     user_id = message.from_user.id
     sent_msg = await bot.send_message(
