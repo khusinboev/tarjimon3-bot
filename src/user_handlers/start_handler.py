@@ -30,7 +30,7 @@ async def command_start_handler(message: Message) -> None:
     #     await bot.send_message(chat_id=adminStart, text=f"Error in start: \n\n{ex}")
 
 
-@router.callback_query(lambda message: message.data == "check", lambda message: message.chat.type == ChatType.PRIVATE)
+@router.callback_query(lambda call: call.message.data == "check", lambda call: call.message.chat.type == ChatType.PRIVATE)
 async def check(call: CallbackQuery):
     user_id = call.from_user.id
     try:
