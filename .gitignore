@@ -13,7 +13,7 @@ env/
 .idea/
 
 # Maxfiy fayllar
-#.env
+.env
 
 # Log fayllar
 *.log
