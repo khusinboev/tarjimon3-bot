@@ -39,7 +39,6 @@ async def text_translate(text, user_id):
             ikkili = True
     elif lang_in=='uz' and lang_out=='en' and len(tarjimachin.split(" "))==1:
         uz_en = await DefinitionEn.uzb_eng(tarjimachin)
-        print(uz_en)
         if uz_en[0] is None:
             tr = GoogleTranslator(source=lang_in, target=lang_out)
             result_text = str(tr.translate(text))
@@ -97,7 +96,6 @@ async def translator(message: Message, bot: Bot):
                 else:
                     if tts:
                         try:
-                            print("indi bera")
                             audio_path = Path(BASE_DIR) / "Audios" / f"{user_id}.mp3"
                             tts = gTTS(text=res_text, lang=lang_out)
                             tts.save(audio_path)
@@ -106,7 +104,6 @@ async def translator(message: Message, bot: Bot):
                                                        caption=f"<code>{res_text}</code>", parse_mode="html",
                                                        reply_markup=exchangeLang)
                         except Exception as e:
-                            print(e)
                             await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
                                                  reply_markup=exchangeLang)
                     else:

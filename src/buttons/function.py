@@ -6,7 +6,6 @@ from config import sql, db
 class Lang:
     @staticmethod
     async def user_lang_update(call: CallbackQuery):
-        print("tillarni yangilash bo'limi")
         data = (call.data)[1:]
         user_id = call.from_user.id
         sql.execute(f"""select langs from public.user_langs where user_id={user_id}""")
