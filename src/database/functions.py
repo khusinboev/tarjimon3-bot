@@ -210,25 +210,27 @@ ALTER FUNCTION public.group_lang()
 class Authenticator:
     @staticmethod
     async def auth_user(message: types.Message):
-        user_id = message.from_user.id
-        username = message.from_user.username
-        lang_code = message.from_user.language_code
+        try:
+            user_id = message.from_user.id
+            username = message.from_user.username
+            lang_code = message.from_user.language_code
 
-        sql.execute(f"""SELECT user_id FROM accounts WHERE user_id = {user_id}""")
-        check = sql.fetchone()
-        if check is None:
-            sql.execute(f"DELETE FROM public.accounts WHERE user_id ='{user_id}'")
-            db.commit()
-            sql.execute(f"DELETE FROM public.user_langs WHERE user_id ='{user_id}'")
-            db.commit()
-            sql.execute(f"DELETE FROM public.users_status WHERE user_id ='{user_id}'")
-            db.commit()
-            sql.execute(f"DELETE FROM public.users_tts WHERE user_id ='{user_id}'")
-            db.commit()
-            # sana = datetime.datetime.now(pytz.timezone('Asia/Tashkent')).strftime('%d-%m-%Y %H:%M')
-            sql.execute(f"INSERT INTO accounts (user_id, username, lang_code) "
-                        f"VALUES ('{user_id}', '{username}', '{lang_code}')")
-            db.commit()
+            sql.execute(f"""SELECT user_id FROM accounts WHERE user_id = {user_id}""")
+            check = sql.fetchone()
+            if check is None:
+                sql.execute(f"DELETE FROM public.accounts WHERE user_id ='{user_id}'")
+                db.commit()
+                sql.execute(f"DELETE FROM public.user_langs WHERE user_id ='{user_id}'")
+                db.commit()
+                sql.execute(f"DELETE FROM public.users_status WHERE user_id ='{user_id}'")
+                db.commit()
+                sql.execute(f"DELETE FROM public.users_tts WHERE user_id ='{user_id}'")
+                db.commit()
+                # sana = datetime.datetime.now(pytz.timezone('Asia/Tashkent')).strftime('%d-%m-%Y %H:%M')
+                sql.execute(f"INSERT INTO accounts (user_id, username, lang_code) "
+                            f"VALUES ('{user_id}', '{username}', '{lang_code}')")
+                db.commit()
+        except: pass
 
     @staticmethod
     async def auth_group(message: types.Message):
