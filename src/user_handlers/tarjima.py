@@ -29,7 +29,7 @@ async def text_translate(text, user_id):
     ikkili = False
     off = False
     simple = False
-    if lang_in==lang_out=='en' and len(tarjimachin.split(" "))==1:
+    if lang_in==lang_out=='en' and len(tarjimachin.split(" "))==1 and len(tarjimachin) != 1:
         definition = await DefinitionEn.defination_en(tarjimachin)
         if definition[0] is None:
             tr = GoogleTranslator(source=lang_in, target=lang_out)
@@ -39,7 +39,7 @@ async def text_translate(text, user_id):
         else:
             result_text = definition
             ikkili = True
-    elif lang_in=='uz' and lang_out=='en' and len(tarjimachin.split(" "))==1:
+    elif lang_in=='uz' and lang_out=='en' and len(tarjimachin.split(" "))==1 and len(tarjimachin) != 1:
         uz_en = await DefinitionEn.uzb_eng(tarjimachin)
         if uz_en[0] is None:
             tr = GoogleTranslator(source=lang_in, target=lang_out)
@@ -49,7 +49,7 @@ async def text_translate(text, user_id):
         else:
             result_text = uz_en
             ikkili = True
-    elif lang_in=='en' and lang_out=='uz' and len(tarjimachin.split(" "))==1:
+    elif lang_in=='en' and lang_out=='uz' and len(tarjimachin.split(" "))==1 and len(tarjimachin) != 1:
         en_uz = await DefinitionEn.eng_uzb(tarjimachin)
         if en_uz[0] is None:
             tr = GoogleTranslator(source=lang_in, target=lang_out)

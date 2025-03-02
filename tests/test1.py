@@ -20,4 +20,5 @@ def clean_html_tags():
     print("Baza muvaffaqiyatli yangilandi!")
 
 
-clean_html_tags()
+def tilmoch(text):
+    api = "https://iapi.glosbe.com/iapi3/similar/similarPhrasesMany?p=qalaysan&l1=en&l2=uz&removeDuplicates=true&searchCriteria=WORDLIST-ALPHABETICALLY-2-s%3BPREFIX-PRIORITY-2-s%3BTRANSLITERATED-PRIORITY-2-s%3BFUZZY-PRIORITY-2-s%3BWORDLIST-ALPHABETICALLY-2-r%3BPREFIX-PRIORITY-2-r%3BTRANSLITERATED-PRIORITY-2-r%3BFUZZY-PRIORITY-2-r&env=en"
