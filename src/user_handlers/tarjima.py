@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 
 from aiogram import Router, Bot, F
@@ -27,6 +28,7 @@ async def text_translate(text, user_id):
     tarjimachin = text.strip()
     ikkili = False
     off = False
+    simple = False
     if lang_in==lang_out=='en' and len(tarjimachin.split(" "))==1:
         definition = await DefinitionEn.defination_en(tarjimachin)
         if definition[0] is None:
@@ -60,8 +62,10 @@ async def text_translate(text, user_id):
     else:
         tr = GoogleTranslator(source=lang_in, target=lang_out)
         result_text = str(tr.translate(text))
-        off = True
-    return lang_in, lang_out, result_text, ikkili, off
+        off = False
+        simple = True
+        result_text = [result_text[i:i+1000] for i in range(0, len(result_text), 1000)]
+    return lang_in, lang_out, result_text, ikkili, off, simple
 
 @router.message(Command("lang"), F.chat.type == "private")
 async def change_lang(message: Message, bot: Bot):
@@ -83,7 +87,7 @@ async def translator(message: Message, bot: Bot):
 
     try:
         if await CheckData.check_on_start(message.chat.id) or user_id in adminPanel:
-            lang_in, lang_out, res_text, ikkili, off = await text_translate(text=message.text, user_id=user_id)
+            lang_in, lang_out, res_text, ikkili, off, simple = await text_translate(text=message.text, user_id=user_id)
             sql.execute(f"""SELECT tts FROM public.users_tts WHERE user_id={user_id}""")
             tts = sql.fetchone()[0]
 
@@ -110,8 +114,13 @@ async def translator(message: Message, bot: Bot):
                         await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
                                              reply_markup=exchangeLang)
 
+            elif simple:
+                for part in res_text:
+                    await message.answer(part)
+                    await asyncio.sleep(0.1)
+                # await message.answer(text=res_text, parse_mode="html", reply_markup=exchangeLang)
+
             else:
-                res_text = res_text
                 await message.answer(text=res_text, parse_mode="html", reply_markup=exchangeLang)
         else:
             await message.answer(
