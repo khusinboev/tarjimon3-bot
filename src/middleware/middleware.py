@@ -14,7 +14,7 @@ class RegisterUserMiddleware(BaseMiddleware):
         user_id = user.id
         username = user.username if user.username else None
         date = datetime.now(pytz.timezone("Asia/Tashkent")).date()
-        lang_code = user.lang_code if user.lang_code else "uz"
+        lang_code = user.language_code if user.language_code else "uz"
         conn = psycopg2.connect(**DB_CONFIG)
         cur = conn.cursor()
 
