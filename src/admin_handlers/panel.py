@@ -1,3 +1,7 @@
+from datetime import datetime, timedelta
+
+import psycopg2
+import pytz
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -8,6 +12,7 @@ from aiogram.fsm.state import StatesGroup, State
 from src.buttons.buttons import AdminPanel
 from config import sql, adminPanel
 from src.functions.functions import PanelFunc
+from src.middleware.middleware import DB_CONFIG
 
 router = Router()
 
@@ -36,11 +41,51 @@ async def backs(message: Message, state: FSMContext):
 
 # Statistika
 @router.message(F.text == "📊Statistika", F.chat.type == ChatType.PRIVATE, F.from_user.id.in_(adminPanel))
-async def new(msg: Message):
-    sql.execute("SELECT COUNT(*) FROM accounts")
-    all_subscriber = sql.fetchone()[0]
-    await msg.answer(
-        f"👥Botdagi jami azolar soni: > {all_subscriber}")
+async def new(message: Message):
+    now = datetime.now(pytz.timezone("Asia/Tashkent")).date()
+    three_months_ago = now - timedelta(days=90)
+    one_week_ago = now - timedelta(days=7)
+
+    conn = psycopg2.connect(**DB_CONFIG)
+    cur = conn.cursor()
+
+    # Oxirgi 3 oy statistikasi
+    cur.execute("SELECT COUNT(*) FROM users_status WHERE date >= %s", (three_months_ago,))
+    last_3_months = cur.fetchone()[0]
+
+    # Har bir oy bo'yicha
+    months = [(now.replace(day=1) - timedelta(days=i * 30)).strftime("%Y-%m") for i in range(3)]
+    month_counts = {}
+    for month in months:
+        cur.execute(
+            "SELECT COUNT(*) FROM users_status WHERE TO_CHAR(date, 'YYYY-MM') = %s", (month,)
+        )
+        month_counts[month] = cur.fetchone()[0] or 0
+
+    # Oxirgi 7 kun statistikasi
+    last_7_days = {}
+    for i in range(7):
+        date_str = (now - timedelta(days=i)).strftime("%Y-%m-%d")
+        cur.execute("SELECT COUNT(*) FROM users_status WHERE date = %s", (date_str,))
+        last_7_days[date_str] = cur.fetchone()[0] or 0
+
+    cur.close()
+    conn.close()
+
+    # Xabarni tayyorlash
+    stats_text = (
+        f"📊 *Foydalanuvchi Statistikasi:*\n\n"
+        f"🔹 *Jami foydalanuvchilar:* {last_3_months}\n\n"
+        f"📅 *Oxirgi 3 oy:* (Jami {last_3_months} ta)\n"
+    )
+    for month, count in month_counts.items():
+        stats_text += f" - {month}: {count} ta\n"
+
+    stats_text += "\n📆 *Oxirgi 7 kun:* (Jami {})\n".format(sum(last_7_days.values()))
+    for day, count in last_7_days.items():
+        stats_text += f" - {day}: {count} ta\n"
+
+    await message.answer(stats_text, parse_mode="Markdown")
 
 
 # Kanallar bo'limi

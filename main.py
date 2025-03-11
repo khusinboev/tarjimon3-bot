@@ -8,7 +8,8 @@ from aiogram.types import *#ChatMemberUpdated, ChatMember,
 
 from config import dp, bot, adminStart, BASE_DIR
 from src.database.functions import create_all_base
-from src.user_handlers import start_handler, middleware, tarjima
+from src.middleware.middleware import AuthMiddleware
+from src.user_handlers import start_handler, user_handler, tarjima
 from src.admin_handlers import panel
 
 router = Router()
@@ -27,6 +28,7 @@ async def on_startup() -> None:
 
 
 async def main() -> None:
+    dp.update.middleware(AuthMiddleware())
     # Startup
     await on_startup()
 
@@ -34,7 +36,7 @@ async def main() -> None:
     dp.include_router(router)
     dp.include_router(start_handler.router)
     dp.include_router(panel.router)
-    dp.include_router(middleware.router)
+    dp.include_router(user_handler.router)
     dp.include_router(tarjima.router)
     await dp.start_polling(bot)
 
