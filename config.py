@@ -37,8 +37,8 @@ db = psycopg2.connect(
     database=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT)
 db.autocommit = True
 sql = db.cursor()  # Connection database of Postgres
-
-conSql = sqlite3.connect(str(Path(__file__).resolve().parent)+"/src/database/dictionary.db")
+print(str(Path(__file__).resolve().parent)+"/src/database/dictionary.db")
+conSql = sqlite3.connect("/home/tarjimon3/tarjimon3-bot/src/database/dictionary.db")
 curSql = conSql.cursor()
 
 # apt-get update
