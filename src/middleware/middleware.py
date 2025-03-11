@@ -19,7 +19,7 @@ class RegisterUserMiddleware(BaseMiddleware):
         cur = conn.cursor()
 
         # Foydalanuvchini tekshirish (bazada yo‘q bo‘lsa, qo‘shish)
-        cur.execute(f"""SELECT user_id FROM public.accounts WHERE user_id = {user_id}""")
+        cur.execute(f"""SELECT user_id FROM public.accounts WHERE user_id = ?""", (user_id, ))
         if not cur.fetchone():  # Agar foydalanuvchi bazada bo'lmasa
             cur.execute(f"DELETE FROM public.accounts WHERE user_id ='{user_id}'")
             conn.commit()
