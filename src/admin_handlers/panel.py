@@ -52,6 +52,10 @@ async def new(message: Message):
     conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
 
+    # Jami foydalanuvchilar
+    cur.execute("SELECT COUNT(*) FROM users_status")
+    all_users = cur.fetchone()[0]
+
     # Oxirgi 3 oydagi jami foydalanuvchilar
     cur.execute("SELECT COUNT(*) FROM users_status WHERE date >= %s", (months[-1],))
     last_3_months = cur.fetchone()[0]
@@ -78,7 +82,7 @@ async def new(message: Message):
     # Xabarni tayyorlash
     stats_text = (
         f"📊 *Foydalanuvchi Statistikasi:*\n\n"
-        f"🔹 *Jami foydalanuvchilar:* {last_3_months}\n\n"
+        f"🔹 *Jami foydalanuvchilar:* {all_users}\n\n"
         f"📅 *Oxirgi 3 oy:* (Jami {last_3_months} ta)\n"
     )
     for month, count in month_counts.items():
