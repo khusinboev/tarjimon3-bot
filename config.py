@@ -18,6 +18,15 @@ DB_PASSWORD = os.environ['DB_PASSWORD']
 DB_HOST = os.environ['DB_HOST']
 DB_PORT = os.environ['DB_PORT']
 
+# PostgreSQL ulanish parametrlari
+DB_CONFIG = {
+    "dbname": DB_NAME,
+    "user": DB_USER,
+    "password": DB_PASSWORD,
+    "host": DB_HOST,
+    "port": DB_PORT
+}
+
 BASE_DIR = str(Path(__file__).resolve().parent)+"/src/Files/"
 
 bot = Bot(token=TOKEN)

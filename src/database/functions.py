@@ -212,8 +212,8 @@ class Authenticator:
     async def auth_user(message: types.Message):
         try:
             user_id = message.from_user.id
-            username = message.from_user.username
-            lang_code = message.from_user.language_code
+            username = message.from_user.username  if message.from_user.username else None
+            lang_code = message.from_user.language_code if message.from_user.language_code else None
 
             sql.execute(f"""SELECT user_id FROM accounts WHERE user_id = {user_id}""")
             check = sql.fetchone()

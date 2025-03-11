@@ -8,7 +8,7 @@ from aiogram.types import *#ChatMemberUpdated, ChatMember,
 
 from config import dp, bot, adminStart, BASE_DIR
 from src.database.functions import create_all_base
-from src.middleware.middleware import AuthMiddleware
+from src.middleware.middleware import RegisterUserMiddleware
 from src.user_handlers import start_handler, user_handler, tarjima
 from src.admin_handlers import panel
 
@@ -28,7 +28,7 @@ async def on_startup() -> None:
 
 
 async def main() -> None:
-    dp.update.middleware(AuthMiddleware())
+    dp.update.middleware(RegisterUserMiddleware())
     # Startup
     await on_startup()
 
