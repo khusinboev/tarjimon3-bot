@@ -15,7 +15,6 @@ router = Router()
 async def command_start_handler(message: Message) -> None:
     user_id = message.from_user.id
     await bot.send_chat_action(chat_id=message.from_user.id, action=ChatAction.TYPING)
-    sql.execute(f"""SELECT user_id FROM public.accounts WHERE user_id = {user_id}""")
     await Authenticator.auth_user(message)
     try:
         if await CheckData.check_on_start(message.from_user.id):
