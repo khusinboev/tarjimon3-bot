@@ -6,11 +6,11 @@ import pytz
 from config import DB_CONFIG
 
 class RegisterUserMiddleware(BaseMiddleware):
-    async def on_pre_process_update(self, update: Update, data: dict):
-        if not update.message:
+    async def __call__(self, handler, event: Update, data: dict):
+        if not event.message:
             return
 
-        user = update.message.from_user
+        user = event.message.from_user
         user_id = user.id
         username = user.username if user.username else None
         date = datetime.now(pytz.timezone("Asia/Tashkent")).date()
