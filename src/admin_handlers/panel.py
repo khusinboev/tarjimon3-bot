@@ -42,25 +42,20 @@ async def backs(message: Message, state: FSMContext):
 # Statistika
 @router.message(F.text == "📊Statistika", F.chat.type == ChatType.PRIVATE, F.from_user.id.in_(adminPanel))
 async def new(message: Message):
-    now = datetime.now(pytz.timezone("Asia/Tashkent")).date()
-    three_months_ago = now - timedelta(days=90)
-    one_week_ago = now - timedelta(days=7)
+    now = datetime.now(pytz.timezone("Asia/Tashkent"))
+    current_month = now.strftime("%Y-%m")
+    last_3_months = [(now.replace(day=1) - timedelta(days=30 * i)).strftime("%Y-%m") for i in range(3)]
 
     conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
 
-    # Oxirgi 3 oy statistikasi
-    cur.execute("SELECT COUNT(*) FROM users_status WHERE date >= %s", (three_months_ago,))
-    last_3_months = cur.fetchone()[0]
-
-    # Har bir oy bo'yicha
-    months = [(now.replace(day=1) - timedelta(days=i * 30)).strftime("%Y-%m") for i in range(3)]
+    # Oxirgi 3 oy bo'yicha foydalanuvchilar soni
     month_counts = {}
-    for month in months:
-        cur.execute(
-            "SELECT COUNT(*) FROM users_status WHERE TO_CHAR(date, 'YYYY-MM') = %s", (month,)
-        )
+    for month in last_3_months:
+        cur.execute("SELECT COUNT(*) FROM users_status WHERE TO_CHAR(date, 'YYYY-MM') = %s", (month,))
         month_counts[month] = cur.fetchone()[0] or 0
+
+    total_last_3_months = sum(month_counts.values())
 
     # Oxirgi 7 kun statistikasi
     last_7_days = {}
@@ -73,15 +68,11 @@ async def new(message: Message):
     conn.close()
 
     # Xabarni tayyorlash
-    stats_text = (
-        f"📊 *Foydalanuvchi Statistikasi:*\n\n"
-        f"🔹 *Jami foydalanuvchilar:* {last_3_months}\n\n"
-        f"📅 *Oxirgi 3 oy:* (Jami {last_3_months} ta)\n"
-    )
+    stats_text = f"📊 *Foydalanuvchi Statistikasi:*\n\n🔹 *Oxirgi 3 oy:* (Jami {total_last_3_months} ta)"
     for month, count in month_counts.items():
         stats_text += f" - {month}: {count} ta\n"
 
-    stats_text += "\n📆 *Oxirgi 7 kun:* (Jami {})\n".format(sum(last_7_days.values()))
+    stats_text += "\n🕝 *Oxirgi 7 kun:* (Jami {})\n".format(sum(last_7_days.values()))
     for day, count in last_7_days.items():
         stats_text += f" - {day}: {count} ta\n"
 
