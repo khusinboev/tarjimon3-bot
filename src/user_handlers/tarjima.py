@@ -87,68 +87,68 @@ async def translator(message: Message, bot: Bot):
     await Authenticator.auth_user(message)
     user_id = message.from_user.id
 
-    # try:
-    print(BASE_DIR)
-    if await CheckData.check_on_start(message.chat.id) or user_id in adminPanel:
-        lang_in, lang_out, res_text, ikkili, off, simple = await text_translate(text=message.text, user_id=user_id)
-        sql.execute(f"""SELECT tts FROM public.users_tts WHERE user_id={user_id}""")
-        tts = sql.fetchone()[0]
-        print("bera galdi")
-        print(tts)
-        if ikkili:
-            print(ikkili)
-            for i in res_text:
-                await message.answer(text=i, parse_mode="html", reply_markup=exchangeLang)
-        elif off:
-            print("beraquu1")
-            if res_text is None:
-                await message.answer(text=message.text, reply_markup=exchangeLang)
-            else:
-                print(tts)
-                if tts:
-                    # try:
-                        audio_path = f"{BASE_DIR}Audios/{user_id}.mp3"
-                        tts = gTTS(text=res_text, lang=lang_out)
+    try:
+        print(BASE_DIR)
+        if await CheckData.check_on_start(message.chat.id) or user_id in adminPanel:
+            lang_in, lang_out, res_text, ikkili, off, simple = await text_translate(text=message.text, user_id=user_id)
+            sql.execute(f"""SELECT tts FROM public.users_tts WHERE user_id={user_id}""")
+            tts = sql.fetchone()[0]
+            print("bera galdi")
+            print(tts)
+            if ikkili:
+                print(ikkili)
+                for i in res_text:
+                    await message.answer(text=i, parse_mode="html", reply_markup=exchangeLang)
+            elif off:
+                print("beraquu1")
+                if res_text is None:
+                    await message.answer(text=message.text, reply_markup=exchangeLang)
+                else:
+                    print(tts)
+                    if tts:
+                        try:
+                            audio_path = f"{BASE_DIR}Audios/{user_id}.mp3"
+                            tts = gTTS(text=res_text, lang=lang_out)
+                            tts.save(audio_path)
+
+                            await message.answer_audio(audio=FSInputFile(audio_path),
+                                                       caption=f"<code>{res_text}</code>", parse_mode="html",
+                                                       reply_markup=exchangeLang)
+                        except Exception as e:
+                            await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
+                                                 reply_markup=exchangeLang)
+                    else:
+                        await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
+                                             reply_markup=exchangeLang)
+
+            elif simple:
+                for part in res_text:
+                    if tts:
+                        audio_path = rf"{BASE_DIR}Audios/{user_id}.mp3"
+                        print(audio_path)
+                        print(lang_out)
+                        if isinstance(audio_path, list):
+                            audio_path = audio_path[0]
+                        tts = gTTS(text=part, lang=lang_out)
                         tts.save(audio_path)
 
                         await message.answer_audio(audio=FSInputFile(audio_path),
-                                                   caption=f"<code>{res_text}</code>", parse_mode="html",
+                                                   caption=f"<code>{part}</code>", parse_mode="html",
                                                    reply_markup=exchangeLang)
-                    # except Exception as e:
-                    #     await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
-                    #                          reply_markup=exchangeLang)
-                else:
-                    await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
-                                         reply_markup=exchangeLang)
+                    # await message.answer(part, reply_markup=exchangeLang)
+                    await asyncio.sleep(0.1)
+                # await message.answer(text=res_text, parse_mode="html", reply_markup=exchangeLang)
 
-        elif simple:
-            for part in res_text:
-                if tts:
-                    audio_path = rf"{BASE_DIR}Audios/{user_id}.mp3"
-                    print(audio_path)
-                    print(lang_out)
-                    if isinstance(audio_path, list):
-                        audio_path = audio_path[0]
-                    tts = gTTS(text=part, lang=lang_out)
-                    tts.save(audio_path)
-
-                    await message.answer_audio(audio=FSInputFile(audio_path),
-                                               caption=f"<code>{part}</code>", parse_mode="html",
-                                               reply_markup=exchangeLang)
-                # await message.answer(part, reply_markup=exchangeLang)
-                await asyncio.sleep(0.1)
-            # await message.answer(text=res_text, parse_mode="html", reply_markup=exchangeLang)
-
+            else:
+                print("beraquu3")
+                await message.answer(text=res_text, parse_mode="html", reply_markup=exchangeLang)
         else:
-            print("beraquu3")
-            await message.answer(text=res_text, parse_mode="html", reply_markup=exchangeLang)
-    else:
-        await message.answer(
-            "Botimizdan foydalanish uchun kanalimizga azo bo'ling\nSubscribe to our channel to use our bot",
-            reply_markup=await UserPanels.join_btn(user_id))
-    # except Exception as ex:
-    #     await bot.forward_message(chat_id=adminStart, from_chat_id=message.chat.id, message_id=message.message_id)
-    #     await bot.send_message(chat_id=adminStart, text=f"Error in translation: \n\n{ex}\n\n\n{message.from_user}")
+            await message.answer(
+                "Botimizdan foydalanish uchun kanalimizga azo bo'ling\nSubscribe to our channel to use our bot",
+                reply_markup=await UserPanels.join_btn(user_id))
+    except Exception as ex:
+        await bot.forward_message(chat_id=adminStart, from_chat_id=message.chat.id, message_id=message.message_id)
+        await bot.send_message(chat_id=adminStart, text=f"Error in translation: \n\n{ex}\n\n\n{message.from_user}")
 
 
 @router.message(F.content_type.in_([ContentType.VOICE, ContentType.AUDIO]), F.chat.type == "private")
@@ -200,8 +200,8 @@ async def audio_tr(message: Message, bot: Bot):
         [InlineKeyboardButton(text="👅 Langs", callback_data="lang_list")]
     ])
 
-    # try:
-    language_map = {
+    try:
+        language_map = {
         "uz": "uz-UZ",
         "tr": "tr-TR",
         "tg": "tg-TJ",
@@ -226,22 +226,22 @@ async def audio_tr(message: Message, bot: Bot):
         "ug": "ug-CN",
         "ur": "ur-PK",
         "bn": "bn-BD",
-    }
-    text = recognizer.recognize_google(audio1, language=language_map[lang_in])
-    lang_in, lang_out, res_text, ikkili, off, simple = await text_translate(text=text, user_id=user_id)
-    if ikkili or simple:
-        for i in res_text:
-            await bot.send_message(chat_id=user_id, text=i, parse_mode="html", reply_markup=exchangeLang)
-    elif off:
-        res_text = res_text[0]
-        await bot.send_message(chat_id=user_id, text=res_text, parse_mode="html", reply_markup=exchangeLang)
-    else:
-        await bot.send_message(chat_id=user_id, text=f"<code>{res_text}</code>", parse_mode="html", reply_markup=exchangeLang)
+        }
+        text = recognizer.recognize_google(audio1, language=language_map[lang_in])
+        lang_in, lang_out, res_text, ikkili, off, simple = await text_translate(text=text, user_id=user_id)
+        if ikkili or simple:
+            for i in res_text:
+                await bot.send_message(chat_id=user_id, text=i, parse_mode="html", reply_markup=exchangeLang)
+        elif off:
+            res_text = res_text[0]
+            await bot.send_message(chat_id=user_id, text=res_text, parse_mode="html", reply_markup=exchangeLang)
+        else:
+            await bot.send_message(chat_id=user_id, text=f"<code>{res_text}</code>", parse_mode="html", reply_markup=exchangeLang)
 
-    await bot.delete_message(chat_id=sent_msg.chat.id, message_id=sent_msg.message_id)
-    # except Exception as ex:
-    #     await bot.send_message(chat_id=user_id, text="Audio tushunarsiz!\n\nThe audio is unclear")
-    #     await bot.delete_message(chat_id=sent_msg.chat.id, message_id=sent_msg.message_id)
-    #     await bot.forward_message(chat_id=adminStart, from_chat_id=message.chat.id, message_id=message.message_id)
-    #     await bot.send_message(chat_id=adminStart, text=f"Error text: \n\n<code>{ex}</code>\n\n\n{message.chat}",
-    #                            parse_mode="html")
+        await bot.delete_message(chat_id=sent_msg.chat.id, message_id=sent_msg.message_id)
+    except Exception as ex:
+        await bot.send_message(chat_id=user_id, text="Audio tushunarsiz!\n\nThe audio is unclear")
+        await bot.delete_message(chat_id=sent_msg.chat.id, message_id=sent_msg.message_id)
+        await bot.forward_message(chat_id=adminStart, from_chat_id=message.chat.id, message_id=message.message_id)
+        await bot.send_message(chat_id=adminStart, text=f"Error text: \n\n<code>{ex}</code>\n\n\n{message.chat}",
+                               parse_mode="html")
