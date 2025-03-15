@@ -136,7 +136,7 @@ async def translator(message: Message, bot: Bot):
                             await message.answer_audio(audio=FSInputFile(audio_path),
                                                    caption=f"<code>{part}</code>", parse_mode="html",
                                                    reply_markup=exchangeLang)
-                        except:
+                    except:
                             await message.answer(part, reply_markup=exchangeLang)
                     await asyncio.sleep(0.1)
                 # await message.answer(text=res_text, parse_mode="html", reply_markup=exchangeLang)
