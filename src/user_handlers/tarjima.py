@@ -115,7 +115,7 @@ async def translator(message: Message, bot: Bot):
                                                        caption=f"<code>{res_text}</code>", parse_mode="html",
                                                        reply_markup=exchangeLang)
                         except Exception as e:
-                            await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
+                            #await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
                                                  reply_markup=exchangeLang)
                     else:
                         await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
