@@ -115,7 +115,7 @@ async def translator(message: Message, bot: Bot):
                                                        caption=f"<code>{res_text}</code>", parse_mode="html",
                                                        reply_markup=exchangeLang)
                         except Exception as e:
-                            #await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
+                            await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
                                                  reply_markup=exchangeLang)
                     else:
                         await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
@@ -123,19 +123,21 @@ async def translator(message: Message, bot: Bot):
 
             elif simple:
                 for part in res_text:
-                    if tts:
-                        audio_path = rf"{BASE_DIR}Audios/{user_id}.mp3"
-                        print(audio_path)
-                        print(lang_out)
-                        if isinstance(audio_path, list):
-                            audio_path = audio_path[0]
-                        tts = gTTS(text=part, lang=lang_out)
-                        tts.save(audio_path)
+                    try:
+                        if tts:
+                            audio_path = rf"{BASE_DIR}Audios/{user_id}.mp3"
+                            print(audio_path)
+                            print(lang_out)
+                            if isinstance(audio_path, list):
+                                audio_path = audio_path[0]
+                            tts = gTTS(text=part, lang=lang_out)
+                            tts.save(audio_path)
 
-                        await message.answer_audio(audio=FSInputFile(audio_path),
+                            await message.answer_audio(audio=FSInputFile(audio_path),
                                                    caption=f"<code>{part}</code>", parse_mode="html",
                                                    reply_markup=exchangeLang)
-                    # await message.answer(part, reply_markup=exchangeLang)
+                        except:
+                            await message.answer(part, reply_markup=exchangeLang)
                     await asyncio.sleep(0.1)
                 # await message.answer(text=res_text, parse_mode="html", reply_markup=exchangeLang)
 
