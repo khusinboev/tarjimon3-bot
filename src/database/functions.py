@@ -194,14 +194,14 @@ ALTER FUNCTION public.group_lang()
 
         langL1 = ["🇺🇿O`zbek", "🇹🇷Turk", "🇹🇯Tajik", "🇬🇧English", "🇯🇵Japan", "🇮🇹Italian", "🇷🇺Русский", "🇰🇷Korean",
                   "🇸🇦Arabic", "🇨🇳Chinese", "🇫🇷French", "🇩🇪German", "🇮🇳Hindi", "🇦🇿Azerbaijan", "🇦🇫Afghan", "🇰🇿Kazakh",
-                  "🇹🇲Turkmen", "🇰🇬Kyrgyz", "🇪🇹Ethiopia", "🇮🇩Indonesian", "🇮🇷Persian"]
+                  "🇹🇲Turkmen", "🇰🇬Kyrgyz", "🇪🇹Ethiopia", "🇮🇩Indonesian", "🇮🇷Persian", "🇨🇳Uyghur", "🇵🇰Urdu", "🇧🇩Bengali"]
 
         langL2 = ["🇺🇿 O`zbek", "🇹🇷 Turk", "🇹🇯 Tajik", "🇬🇧 English", "🇯🇵 Japan", "🇮🇹 Italian", "🇷🇺 Русский", "🇰🇷 Korean",
                   "🇸🇦 Arabic", "🇨🇳 Chinese", "🇫🇷 French", "🇩🇪 German", "🇮🇳 Hindi", "🇦🇿 Azerbaijan", "🇦🇫 Afghan", "🇰🇿 Kazakh",
-                  "🇹🇲 Turkmen", "🇰🇬 Kyrgyz", "🇪🇹 Ethiopia", "🇮🇩 Indonesian", "🇮🇷 Persian"]
+                  "🇹🇲 Turkmen", "🇰🇬 Kyrgyz", "🇪🇹 Ethiopia", "🇮🇩 Indonesian", "🇮🇷 Persian", "🇨🇳 Uyghur", "🇵🇰 Urdu", "🇧🇩 Bengali"]
 
         codes = ["uz", "tr", "tg", "en", "ja", "it", "ru", "korean", "ar", "zh-CN", "fr", "de", "hi", "az", "af", "kk",
-                 "tk", "ky", "am", "id", "fa"]
+                 "tk", "ky", "am", "id", "fa", "ug", "ur", "bn"]
         for lang1, lang2, code in zip(langL1, langL2, codes):
             sql.execute(f"""INSERT INTO public.langs_list (lang_in, lang_out, code) VALUES ('{lang1}', '{lang2}', '{code}');""")
             db.commit()

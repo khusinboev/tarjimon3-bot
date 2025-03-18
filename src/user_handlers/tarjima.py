@@ -1,11 +1,11 @@
 import asyncio
 from pathlib import Path
 
+import requests
 from aiogram import Router, Bot, F
 from aiogram.enums import ChatAction
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, ContentType, FSInputFile
 from aiogram.filters import Command
-from deep_translator import GoogleTranslator
 from pydub import AudioSegment
 from gtts import gTTS
 import speech_recognition as sr
@@ -31,42 +31,78 @@ async def text_translate(text, user_id):
     ikkili = False
     off = False
     simple = False
-    if lang_in==lang_out=='en' and len(tarjimachin.split(" "))==1 and len(tarjimachin) != 1:
-        definition = await DefinitionEn.defination_en(tarjimachin)
-        if definition[0] is None:
-            tr = GoogleTranslator(source=lang_in, target=lang_out)
-            result_text = str(tr.translate(text))
-        elif len(definition) == 1:
-            result_text = definition[0]
-        else:
-            result_text = definition
-            ikkili = True
-    elif lang_in=='uz' and lang_out=='en' and len(tarjimachin.split(" "))==1 and len(tarjimachin) != 1:
-        uz_en = await DefinitionEn.uzb_eng(tarjimachin)
-        if uz_en[0] is None:
-            tr = GoogleTranslator(source=lang_in, target=lang_out)
-            result_text = str(tr.translate(text))
-        elif len(uz_en) == 1:
-            result_text = uz_en[0]
-        else:
-            result_text = uz_en
-            ikkili = True
-    elif lang_in=='en' and lang_out=='uz' and len(tarjimachin.split(" "))==1 and len(tarjimachin) != 1:
-        en_uz = await DefinitionEn.eng_uzb(tarjimachin)
-        if en_uz[0] is None:
-            tr = GoogleTranslator(source=lang_in, target=lang_out)
-            result_text = str(tr.translate(text))
-        elif len(en_uz) == 1:
-            result_text = en_uz[0]
-        else:
-            result_text = en_uz
-            ikkili = True
-    else:
+    # if lang_in==lang_out=='en' and len(tarjimachin.split(" "))==1 and len(tarjimachin) != 1:
+    #     definition = await DefinitionEn.defination_en(tarjimachin)
+    #     if definition[0] is None:
+    #         tr = GoogleTranslator(source=lang_in, target=lang_out)
+    #         result_text = str(tr.translate(text))
+    #     elif len(definition) == 1:
+    #         result_text = definition[0]
+    #     else:
+    #         result_text = definition
+    #         ikkili = True
+    # elif lang_in=='uz' and lang_out=='en' and len(tarjimachin.split(" "))==1 and len(tarjimachin) != 1:
+    #     uz_en = await DefinitionEn.uzb_eng(tarjimachin)
+    #     if uz_en[0] is None:
+    #         tr = GoogleTranslator(source=lang_in, target=lang_out)
+    #         result_text = str(tr.translate(text))
+    #     elif len(uz_en) == 1:
+    #         result_text = uz_en[0]
+    #     else:
+    #         result_text = uz_en
+    #         ikkili = True
+    # elif lang_in=='en' and lang_out=='uz' and len(tarjimachin.split(" "))==1 and len(tarjimachin) != 1:
+    #     en_uz = await DefinitionEn.eng_uzb(tarjimachin)
+    #     if en_uz[0] is None:
+    #         tr = GoogleTranslator(source=lang_in, target=lang_out)
+    #         result_text = str(tr.translate(text))
+    #     elif len(en_uz) == 1:
+    #         result_text = en_uz[0]
+    #     else:
+    #         result_text = en_uz
+    #         ikkili = True
+    # else:
+    try:
+        from deep_translator import GoogleTranslator
         tr = GoogleTranslator(source=lang_in, target=lang_out)
-        result_text = str(tr.translate(text))
+        result_text = str(tr.translate(text=text))
         off = False
         simple = True
         result_text = [result_text[i:i+1000] for i in range(0, len(result_text), 1000)]
+        if len(result_text) > 1: ikkili = True
+    except:
+        try:
+            from googletrans import Translator
+            translator = Translator()
+            translation = translator.translate("Salom", src=lang_in, dest=lang_out)
+            result_text = translation.text
+            result_text = [result_text[i:i + 1000] for i in range(0, len(result_text), 1000)]
+            off = False
+            simple = True
+            if len(result_text) > 1: ikkili = True
+        except:
+            try:
+                url = "https://api.mymemory.translated.net/get"
+                params = {
+                    "q": text,
+                    "langpair": f"{lang_in}|{lang_out}"
+                }
+                response = requests.get(url, params=params)
+                if response.status_code == 200:
+                    result_text = response.json()["responseData"]["translatedText"]
+                    result_text = [result_text[i:i + 1000] for i in range(0, len(result_text), 1000)]
+                    off = False
+                    simple = True
+                    if len(result_text) > 1: ikkili = True
+                else:
+                    result_text = "ERROR"
+                    off = False
+                    simple = True
+            except:
+                result_text = "ERROR"
+                off = False
+                simple = True
+
     return lang_in, lang_out, result_text, ikkili, off, simple
 
 @router.message(Command("lang"), F.chat.type == "private")
@@ -88,62 +124,69 @@ async def translator(message: Message, bot: Bot):
     user_id = message.from_user.id
 
     try:
-        print(BASE_DIR)
         if await CheckData.check_on_start(message.chat.id) or user_id in adminPanel:
             lang_in, lang_out, res_text, ikkili, off, simple = await text_translate(text=message.text, user_id=user_id)
             sql.execute(f"""SELECT tts FROM public.users_tts WHERE user_id={user_id}""")
             tts = sql.fetchone()[0]
-            print("bera galdi")
-            print(tts)
-            if ikkili:
-                print(ikkili)
-                for i in res_text:
-                    await message.answer(text=i, parse_mode="html", reply_markup=exchangeLang)
-            elif off:
-                print("beraquu1")
-                if res_text is None:
-                    await message.answer(text=message.text, reply_markup=exchangeLang)
-                else:
-                    print(tts)
-                    if tts:
-                        try:
-                            audio_path = f"{BASE_DIR}Audios/{user_id}.mp3"
-                            tts = gTTS(text=res_text, lang=lang_out)
-                            tts.save(audio_path)
-
-                            await message.answer_audio(audio=FSInputFile(audio_path),
-                                                       caption=f"<code>{res_text}</code>", parse_mode="html",
-                                                       reply_markup=exchangeLang)
-                        except Exception as e:
-                            await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
-                                                 reply_markup=exchangeLang)
-                    else:
-                        await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
-                                             reply_markup=exchangeLang)
-
-            elif simple:
-                for part in res_text:
+            if tts and lang_out in ["en", "it", "ru", "korean", "ar", "zh-CN", "fr", "de", "hi", "id", "fa", "bn"]:
+                for res in res_text:
                     try:
-                        if tts:
-                            audio_path = rf"{BASE_DIR}Audios/{user_id}.mp3"
-                            print(audio_path)
-                            print(lang_out)
-                            if isinstance(audio_path, list):
-                                audio_path = audio_path[0]
-                            tts = gTTS(text=part, lang=lang_out)
-                            tts.save(audio_path)
+                        audio_path = f"{BASE_DIR}Audios/{user_id}.mp3"
+                        tts = gTTS(text=str(res_text), lang=str(lang_out))
+                        tts.save(str(audio_path))
 
-                            await message.answer_audio(audio=FSInputFile(audio_path),
-                                                   caption=f"<code>{part}</code>", parse_mode="html",
+                        await message.answer_audio(audio=FSInputFile(audio_path),
+                                                   caption=f"<code>{res}</code>", parse_mode="html",
                                                    reply_markup=exchangeLang)
-                    except:
-                            await message.answer(part, reply_markup=exchangeLang)
-                    await asyncio.sleep(0.1)
-                # await message.answer(text=res_text, parse_mode="html", reply_markup=exchangeLang)
-
+                    except Exception as e:
+                        print(e)
+                        await message.answer(text=f"<code>{res}</code>", parse_mode="html",
+                                             reply_markup=exchangeLang)
             else:
-                print("beraquu3")
-                await message.answer(text=res_text, parse_mode="html", reply_markup=exchangeLang)
+                for res in res_text:
+                    await message.answer(text=f"<code>{res}</code>", parse_mode="html", reply_markup=exchangeLang)
+
+            # if ikkili:
+            #     for i in res_text:
+            #         await message.answer(text=i, parse_mode="html", reply_markup=exchangeLang)
+            # elif off:
+            #     if res_text is None:
+            #         await message.answer(text=message.text, reply_markup=exchangeLang)
+            #     else:
+            #         if tts:
+            #             try:
+            #                 audio_path = f"{BASE_DIR}Audios/{user_id}.mp3"
+            #                 tts = gTTS(text=res_text, lang=lang_out)
+            #                 tts.save(audio_path)
+            #
+            #                 await message.answer_audio(audio=FSInputFile(audio_path),
+            #                                            caption=f"<code>{res_text}</code>", parse_mode="html",
+            #                                            reply_markup=exchangeLang)
+            #             except Exception as e:
+            #                 await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
+            #                                      reply_markup=exchangeLang)
+            #         else:
+            #             await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
+            #                                  reply_markup=exchangeLang)
+            # elif simple:
+            #     for part in res_text:
+            #         try:
+            #             if tts:
+            #                 audio_path = rf"{BASE_DIR}Audios/{user_id}.mp3"
+            #                 if isinstance(audio_path, list):
+            #                     audio_path = audio_path[0]
+            #                 tts = gTTS(text=part, lang=lang_out)
+            #                 tts.save(audio_path)
+            #
+            #                 await message.answer_audio(audio=FSInputFile(audio_path),
+            #                                        caption=f"<code>{part}</code>", parse_mode="html",
+            #                                        reply_markup=exchangeLang)
+            #         except:
+            #                 await message.answer(part, reply_markup=exchangeLang)
+            #         await asyncio.sleep(0.1)
+            #     # await message.answer(text=res_text, parse_mode="html", reply_markup=exchangeLang)
+            # else:
+            #     await message.answer(text=res_text, parse_mode="html", reply_markup=exchangeLang)
         else:
             await message.answer(
                 "Botimizdan foydalanish uchun kanalimizga azo bo'ling\nSubscribe to our channel to use our bot",
