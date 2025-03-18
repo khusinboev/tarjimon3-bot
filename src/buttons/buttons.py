@@ -88,6 +88,12 @@ class UserPanels:
         return keyboard
 
     @staticmethod
+    async def back_menu():
+        back_btn = [[types.KeyboardButton(text="So'rovni tugatish")]]
+        back_btn = types.ReplyKeyboardMarkup(keyboard=back_btn, resize_keyboard=True)
+        return back_btn
+
+    @staticmethod
     async def langs_inline(user_id):
         # Foydalanuvchi tanlagan tillarni olish
         user_in, user_out = await Lang.user_langs(user_id)

@@ -21,89 +21,119 @@ from src.functions.functions import CheckData
 router = Router()
 
 
+# Tarjima usullarini alohida funksiyalarga ajratish
+def translate_with_deep_translator(text, lang_in, lang_out):
+    try:
+        from deep_translator import GoogleTranslator
+        tr = GoogleTranslator(source=lang_in, target=lang_out)
+        result_text = str(tr.translate(text=text))
+        return [result_text[i:i+1000] for i in range(0, len(result_text), 1000)]
+    except Exception as e:
+        print(f"Deep Translator xatosi: {e}")
+        return None
+
+def translate_with_googletrans(text, lang_in, lang_out):
+    try:
+        from googletrans import Translator
+        translator = Translator()
+        translation = translator.translate(text, src=lang_in, dest=lang_out)
+        result_text = translation.text
+        return [result_text[i:i+1000] for i in range(0, len(result_text), 1000)]
+    except Exception as e:
+        print(f"Googletrans xatosi: {e}")
+        return None
+
+def translate_with_mymemory(text, lang_in, lang_out):
+    try:
+        url = "https://api.mymemory.translated.net/get"
+        params = {
+            "q": text,
+            "langpair": f"{lang_in}|{lang_out}"
+        }
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            result_text = response.json()["responseData"]["translatedText"]
+            return [result_text[i:i+1000] for i in range(0, len(result_text), 1000)]
+        else:
+            print(f"MyMemory API xatosi: {response.status_code}")
+            return None
+    except Exception as e:
+        print(f"MyMemory API xatosi: {e}")
+        return None
+
+# Asosiy tarjima funksiyasi
 async def text_translate(text, user_id):
+    # Foydalanuvchi tilini bazadan olish
     sql.execute(f"""SELECT in_lang FROM public.user_langs WHERE user_id={user_id}""")
     lang_in = sql.fetchone()[0]
 
     sql.execute(f"""SELECT out_lang FROM public.user_langs WHERE user_id={user_id}""")
     lang_out = sql.fetchone()[0]
-    tarjimachin = text.strip()
-    ikkili = False
-    off = False
-    simple = False
-    # if lang_in==lang_out=='en' and len(tarjimachin.split(" "))==1 and len(tarjimachin) != 1:
-    #     definition = await DefinitionEn.defination_en(tarjimachin)
-    #     if definition[0] is None:
-    #         tr = GoogleTranslator(source=lang_in, target=lang_out)
-    #         result_text = str(tr.translate(text))
-    #     elif len(definition) == 1:
-    #         result_text = definition[0]
-    #     else:
-    #         result_text = definition
-    #         ikkili = True
-    # elif lang_in=='uz' and lang_out=='en' and len(tarjimachin.split(" "))==1 and len(tarjimachin) != 1:
-    #     uz_en = await DefinitionEn.uzb_eng(tarjimachin)
-    #     if uz_en[0] is None:
-    #         tr = GoogleTranslator(source=lang_in, target=lang_out)
-    #         result_text = str(tr.translate(text))
-    #     elif len(uz_en) == 1:
-    #         result_text = uz_en[0]
-    #     else:
-    #         result_text = uz_en
-    #         ikkili = True
-    # elif lang_in=='en' and lang_out=='uz' and len(tarjimachin.split(" "))==1 and len(tarjimachin) != 1:
-    #     en_uz = await DefinitionEn.eng_uzb(tarjimachin)
-    #     if en_uz[0] is None:
-    #         tr = GoogleTranslator(source=lang_in, target=lang_out)
-    #         result_text = str(tr.translate(text))
-    #     elif len(en_uz) == 1:
-    #         result_text = en_uz[0]
-    #     else:
-    #         result_text = en_uz
-    #         ikkili = True
-    # else:
-    try:
-        from deep_translator import GoogleTranslator
-        tr = GoogleTranslator(source=lang_in, target=lang_out)
-        result_text = str(tr.translate(text=text))
-        off = False
-        simple = True
-        result_text = [result_text[i:i+1000] for i in range(0, len(result_text), 1000)]
-        if len(result_text) > 1: ikkili = True
-    except:
-        try:
-            from googletrans import Translator
-            translator = Translator()
-            translation = translator.translate("Salom", src=lang_in, dest=lang_out)
-            result_text = translation.text
-            result_text = [result_text[i:i + 1000] for i in range(0, len(result_text), 1000)]
-            off = False
-            simple = True
-            if len(result_text) > 1: ikkili = True
-        except:
-            try:
-                url = "https://api.mymemory.translated.net/get"
-                params = {
-                    "q": text,
-                    "langpair": f"{lang_in}|{lang_out}"
-                }
-                response = requests.get(url, params=params)
-                if response.status_code == 200:
-                    result_text = response.json()["responseData"]["translatedText"]
-                    result_text = [result_text[i:i + 1000] for i in range(0, len(result_text), 1000)]
-                    off = False
-                    simple = True
-                    if len(result_text) > 1: ikkili = True
-                else:
-                    result_text = "ERROR"
-                    off = False
-                    simple = True
-            except:
-                result_text = "ERROR"
-                off = False
-                simple = True
 
-    return lang_in, lang_out, result_text, ikkili, off, simple
+    # Tarjima usullarini ro'yxatga joylash
+    translation_methods = [
+        translate_with_deep_translator,
+        translate_with_googletrans,
+        translate_with_mymemory
+    ]
+
+    # Random tarzda tarjima usulini tanlash
+    import random
+    selected_method = random.choice(translation_methods)
+
+    # Tanlangan usul yordamida tarjima qilish
+    result_text = selected_method(text, lang_in, lang_out)
+
+    # Agar tanlangan usul ishlamasa, boshqa usullarni sinab ko'rish
+    if result_text is None:
+        for method in translation_methods:
+            if method != selected_method:
+                result_text = method(text, lang_in, lang_out)
+                if result_text is not None:
+                    break
+
+    # Agar hech qanday usul ishlamasa, xabar qaytarish
+    if result_text is None:
+        result_text = ["Tarjima qilishda xatolik yuz berdi."]
+
+    return lang_out, result_text
+
+
+# async def text_translate(text, user_id):
+#     sql.execute(f"""SELECT in_lang FROM public.user_langs WHERE user_id={user_id}""")
+#     lang_in = sql.fetchone()[0]
+#
+#     sql.execute(f"""SELECT out_lang FROM public.user_langs WHERE user_id={user_id}""")
+#     lang_out = sql.fetchone()[0]
+#     try:
+#         from deep_translator import GoogleTranslator
+#         tr = GoogleTranslator(source=lang_in, target=lang_out)
+#         result_text = str(tr.translate(text=text))
+#         result_text = [result_text[i:i+1000] for i in range(0, len(result_text), 1000)]
+#     except:
+#         try:
+#             from googletrans import Translator
+#             translator = Translator()
+#             translation = translator.translate("Salom", src=lang_in, dest=lang_out)
+#             result_text = translation.text
+#             result_text = [result_text[i:i + 1000] for i in range(0, len(result_text), 1000)]
+#         except:
+#             try:
+#                 url = "https://api.mymemory.translated.net/get"
+#                 params = {
+#                     "q": text,
+#                     "langpair": f"{lang_in}|{lang_out}"
+#                 }
+#                 response = requests.get(url, params=params)
+#                 if response.status_code == 200:
+#                     result_text = response.json()["responseData"]["translatedText"]
+#                     result_text = [result_text[i:i + 1000] for i in range(0, len(result_text), 1000)]
+#                 else:
+#                     result_text = "ERROR"
+#             except:
+#                 result_text = "ERROR"
+#
+#     return lang_out, result_text
 
 @router.message(Command("lang"), F.chat.type == "private")
 async def change_lang(message: Message, bot: Bot):
@@ -125,7 +155,7 @@ async def translator(message: Message, bot: Bot):
 
     try:
         if await CheckData.check_on_start(message.chat.id) or user_id in adminPanel:
-            lang_in, lang_out, res_text, ikkili, off, simple = await text_translate(text=message.text, user_id=user_id)
+            lang_out, res_text = await text_translate(text=message.text, user_id=user_id)
             sql.execute(f"""SELECT tts FROM public.users_tts WHERE user_id={user_id}""")
             tts = sql.fetchone()[0]
             if tts and lang_out in ["en", "it", "ru", "korean", "ar", "zh-CN", "fr", "de", "hi", "id", "fa", "bn"]:
@@ -146,47 +176,6 @@ async def translator(message: Message, bot: Bot):
                 for res in res_text:
                     await message.answer(text=f"<code>{res}</code>", parse_mode="html", reply_markup=exchangeLang)
 
-            # if ikkili:
-            #     for i in res_text:
-            #         await message.answer(text=i, parse_mode="html", reply_markup=exchangeLang)
-            # elif off:
-            #     if res_text is None:
-            #         await message.answer(text=message.text, reply_markup=exchangeLang)
-            #     else:
-            #         if tts:
-            #             try:
-            #                 audio_path = f"{BASE_DIR}Audios/{user_id}.mp3"
-            #                 tts = gTTS(text=res_text, lang=lang_out)
-            #                 tts.save(audio_path)
-            #
-            #                 await message.answer_audio(audio=FSInputFile(audio_path),
-            #                                            caption=f"<code>{res_text}</code>", parse_mode="html",
-            #                                            reply_markup=exchangeLang)
-            #             except Exception as e:
-            #                 await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
-            #                                      reply_markup=exchangeLang)
-            #         else:
-            #             await message.answer(text=f"<code>{res_text}</code>", parse_mode="html",
-            #                                  reply_markup=exchangeLang)
-            # elif simple:
-            #     for part in res_text:
-            #         try:
-            #             if tts:
-            #                 audio_path = rf"{BASE_DIR}Audios/{user_id}.mp3"
-            #                 if isinstance(audio_path, list):
-            #                     audio_path = audio_path[0]
-            #                 tts = gTTS(text=part, lang=lang_out)
-            #                 tts.save(audio_path)
-            #
-            #                 await message.answer_audio(audio=FSInputFile(audio_path),
-            #                                        caption=f"<code>{part}</code>", parse_mode="html",
-            #                                        reply_markup=exchangeLang)
-            #         except:
-            #                 await message.answer(part, reply_markup=exchangeLang)
-            #         await asyncio.sleep(0.1)
-            #     # await message.answer(text=res_text, parse_mode="html", reply_markup=exchangeLang)
-            # else:
-            #     await message.answer(text=res_text, parse_mode="html", reply_markup=exchangeLang)
         else:
             await message.answer(
                 "Botimizdan foydalanish uchun kanalimizga azo bo'ling\nSubscribe to our channel to use our bot",

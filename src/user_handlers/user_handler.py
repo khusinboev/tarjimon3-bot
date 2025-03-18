@@ -81,18 +81,18 @@ async def lang_set(message: Message) -> None:
     await message.answer("Tillar / Languages", reply_markup=await UserPanels.user_langs_inline(user_id))
 
 
-# TIL SOZLAMALARI // TILLARNI BELGILASH
+# YO'RIQNOMA
 @router.message(F.text == "📑Yo'riqnoma", lambda message: message.chat.type == ChatType.PRIVATE)
 async def lang_set(message: Message) -> None:
     user_id = message.from_user.id
     await bot.copy_message(chat_id=user_id, from_chat_id=-1002499471134, message_id=2)
 
 
-# TIL SOZLAMALARI // TILLARNI BELGILASH
-@router.message(F.text == "️‼️Fikr bildirish", lambda message: message.chat.type == ChatType.PRIVATE)
-async def lang_set(message: Message) -> None:
-    user_id = message.from_user.id
-    await message.answer(text="https://t.me/translate_bot_chat")
+# FIKR BILDIRISH
+# @router.message(F.text == "️‼️Fikr bildirish", lambda message: message.chat.type == ChatType.PRIVATE)
+# async def lang_set(message: Message) -> None:
+#     user_id = message.from_user.id
+#     await message.answer(text="https://t.me/translate_bot_chat")
 
 
 def lang_filter():
