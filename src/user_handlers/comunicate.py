@@ -36,7 +36,7 @@ async def person_quest1(message: Message, state: FSMContext):
         await state.clear()
     else:
         name = message.from_user.first_name
-        msg = await bot.send_message(chat_id=GROUP_ID, text=(str(user_id) + f" - <b>{name}</b>"), parse_mode='html')
+        msg = await bot.send_message(chat_id=GROUP_ID, text=(str(user_id) + f" - <b>{name}</b>/n@{message.from_user.username}"), parse_mode='html')
         await bot.copy_message(
             chat_id=GROUP_ID,
             from_chat_id=message.chat.id,
@@ -53,7 +53,7 @@ async def person_quest1(message: Message, state: FSMContext):
         await state.clear()
     else:
         name = message.from_user.first_name
-        msg = await bot.send_message(chat_id=GROUP_ID, text=(str(user_id) + f"<b>{name}</b>"), parse_mode='html')
+        msg = await bot.send_message(chat_id=GROUP_ID, text=(str(user_id) + f" - <b>{name}</b>/n@{message.from_user.username}"), parse_mode='html')
 
         await bot.copy_message(
             chat_id=GROUP_ID,
