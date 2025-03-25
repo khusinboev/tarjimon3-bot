@@ -80,7 +80,7 @@ class UserPanels:
         keyboard = types.ReplyKeyboardMarkup(
             keyboard=[
                 [types.KeyboardButton(text="✅Tillarni tanlash"), types.KeyboardButton(text="⚙️Tillarni sozlash")],
-                [types.KeyboardButton(text="📑Yo'riqnoma"), types.KeyboardButton(text="️‼️Fikr bildirish")]
+                #[types.KeyboardButton(text="📑Yo'riqnoma"), types.KeyboardButton(text="️‼️Fikr bildirish")]
             ],
             resize_keyboard=True
         )
