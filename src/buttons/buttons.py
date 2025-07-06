@@ -15,9 +15,8 @@ class AdminPanel:
                             KeyboardButton(text="🔧Kanallar"),
                         ],
                         [
-                             KeyboardButton(text="✍Xabarlar"),
-                        #     KeyboardButton(text="♻️ Tozalash"),
-                        # ]
+                             KeyboardButton(text="✍Xabarlar")
+                         ]
                     ],
                     resize_keyboard=True,
                 )
