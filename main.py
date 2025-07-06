@@ -10,7 +10,7 @@ from config import dp, bot, adminStart, BASE_DIR
 from src.database.functions import create_all_base
 from src.middleware.middleware import RegisterUserMiddleware
 from src.user_handlers import start_handler, user_handler, tarjima, comunicate
-from src.admin_handlers.messages import msg_router
+from src.admin_handlers.message import msg_router
 from src.admin_handlers import panel
 
 router = Router()
