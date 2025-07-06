@@ -12,7 +12,7 @@ from aiogram.exceptions import (
 )
 
 from config import adminPanel, sql, bot
-from src.keyboards.buttons import AdminPanel
+from src.buttons.buttons import AdminPanel
 
 msg_router = Router()
 
