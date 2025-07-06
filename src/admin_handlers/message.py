@@ -1,10 +1,15 @@
 import asyncio
-from aiogram import Router, F, Bot
+from aiogram import Router, F
 from aiogram.enums import ChatType
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup
-from aiogram.exceptions import TelegramBadRequest, TelegramAPIError, TelegramForbiddenError, TelegramNotFound
+from aiogram.exceptions import (
+    TelegramBadRequest,
+    TelegramAPIError,
+    TelegramForbiddenError,
+    TelegramNotFound,
+)
 
 from config import ADMIN_ID, sql, bot
 from src.keyboards.buttons import AdminPanel
@@ -13,7 +18,7 @@ msg_router = Router()
 
 
 # === HOLAT (FSM) === #
-class MsgState(StatesGroup):
+class Form(StatesGroup):
     forward_msg = State()
     send_msg = State()
 
@@ -25,21 +30,21 @@ markup = ReplyKeyboardMarkup(
 )
 
 
-# === ADMIN PANEL === #
+# === ADMIN PANELGA KIRISH === #
 @msg_router.message(F.text == "✍Xabarlar", F.chat.type == ChatType.PRIVATE, F.from_user.id.in_(ADMIN_ID))
 async def panel_handler(message: Message) -> None:
-    await message.answer("Xabarlar bo'limi!", reply_markup=await AdminPanel.admin_msg())
+    await message.answer("✍ Xabarlar bo‘limi", reply_markup=await AdminPanel.admin_msg())
 
 
-# === FORWARD XABAR BOSHLASH === #
+# === FORWARD BOSHLASH === #
 @msg_router.message(F.text == "📨Forward xabar yuborish", F.chat.type == ChatType.PRIVATE, F.from_user.id.in_(ADMIN_ID))
 async def start_forward(message: Message, state: FSMContext):
-    await message.answer("Forward yuboriladigan xabarni yuboring", reply_markup=markup)
-    await state.set_state(MsgState.forward_msg)
+    await message.answer("📨 Forward yuboriladigan xabarni yuboring", reply_markup=markup)
+    await state.set_state(Form.forward_msg)
 
 
-# === FORWARD XABARNI YUBORISH === #
-@msg_router.message(MsgState.forward_msg, F.chat.type == ChatType.PRIVATE, F.from_user.id.in_(ADMIN_ID))
+# === FORWARD YUBORISH === #
+@msg_router.message(Form.forward_msg, F.chat.type == ChatType.PRIVATE, F.from_user.id.in_(ADMIN_ID))
 async def send_forward_to_all(message: Message, state: FSMContext):
     await state.clear()
     sql.execute("SELECT user_id FROM public.accounts")
@@ -48,11 +53,8 @@ async def send_forward_to_all(message: Message, state: FSMContext):
 
     success, failed = await broadcast_forward(user_ids, message)
 
-    await message.bot.send_message(
-        chat_id=message.chat.id,
-        text=f"✅ Forward xabar yuborildi\n\n"
-             f"📤 Yuborilgan: {success} ta\n"
-             f"❌ Yuborilmagan: {failed} ta",
+    await message.answer(
+        f"✅ Forward yuborildi\n\n📤 Yuborilgan: {success} ta\n❌ Yuborilmagan: {failed} ta",
         reply_markup=await AdminPanel.admin_msg()
     )
 
@@ -60,12 +62,12 @@ async def send_forward_to_all(message: Message, state: FSMContext):
 # === ODDIY XABAR BOSHLASH === #
 @msg_router.message(F.text == "📬Oddiy xabar yuborish", F.chat.type == ChatType.PRIVATE, F.from_user.id.in_(ADMIN_ID))
 async def start_text_send(message: Message, state: FSMContext):
-    await message.answer("Yuborilishi kerak bo'lgan xabarni yuboring", reply_markup=markup)
-    await state.set_state(MsgState.send_msg)
+    await message.answer("📬 Yuborilishi kerak bo‘lgan matnli xabarni yuboring", reply_markup=markup)
+    await state.set_state(Form.send_msg)
 
 
 # === ODDIY XABARNI YUBORISH === #
-@msg_router.message(MsgState.send_msg, F.chat.type == ChatType.PRIVATE, F.from_user.id.in_(ADMIN_ID))
+@msg_router.message(Form.send_msg, F.chat.type == ChatType.PRIVATE, F.from_user.id.in_(ADMIN_ID))
 async def send_text_to_all(message: Message, state: FSMContext):
     await state.clear()
     sql.execute("SELECT user_id FROM public.accounts")
@@ -75,31 +77,28 @@ async def send_text_to_all(message: Message, state: FSMContext):
     success, failed = await broadcast_copy(user_ids, message)
 
     await message.answer(
-        f"✅ Oddiy xabar yuborildi\n\n"
-        f"📤 Yuborilgan: {success} ta\n"
-        f"❌ Yuborilmagan: {failed} ta",
+        f"✅ Matnli xabar yuborildi\n\n📤 Yuborilgan: {success} ta\n❌ Yuborilmagan: {failed} ta",
         reply_markup=await AdminPanel.admin_msg()
     )
 
 
 # === ORQAGA QAYTISH === #
-@msg_router.message(F.text == "🔙Orqaga qaytish", F.chat.type == ChatType.PRIVATE, F.from_user.id.in_(ADMIN_ID))
+@msg_router.message(F.text == "🔙Orqaga qaytish", F.chat.type == ChatType.PRIVATE, F.from_user.id.in_(ADMIN_ID), Form.forward_msg | Form.send_msg)
 async def back_to_menu(message: Message, state: FSMContext):
     await state.clear()
-    await message.answer("Orqaga qaytildi", reply_markup=await AdminPanel.admin_msg())
+    await message.answer("⬅️ Orqaga qaytdingiz", reply_markup=await AdminPanel.admin_msg())
 
 
 # =======================
 #       BROADCAST
 # =======================
 
-semaphore = asyncio.Semaphore(30)  # 30 ta parallel yuborishga ruxsat
+semaphore = asyncio.Semaphore(30)  # Parallel yuborish chegarasi
 
-# --- ODDIY XABAR BROADCAST --- #
+# --- MATNLI XABAR BROADCAST --- #
 async def broadcast_copy(user_ids: list[int], message: Message) -> tuple[int, int]:
     success = 0
     failed = 0
-
     status_msg = await message.answer("📤 Yuborish boshlandi...")
 
     for i, user_id in enumerate(user_ids, 1):
@@ -119,8 +118,7 @@ async def broadcast_copy(user_ids: list[int], message: Message) -> tuple[int, in
                     f"📊 Progres: {i}/{len(user_ids)}"
                 )
             except Exception as e:
-                print(f"❗Holatni yangilash xatosi: {e}")
-
+                print(f"❗Holat yangilashda xato: {e}")
     return success, failed
 
 
@@ -128,7 +126,6 @@ async def broadcast_copy(user_ids: list[int], message: Message) -> tuple[int, in
 async def broadcast_forward(user_ids: list[int], message: Message) -> tuple[int, int]:
     success = 0
     failed = 0
-
     status_msg = await message.answer("📨 Forward yuborish boshlandi...")
 
     for i, user_id in enumerate(user_ids, 1):
@@ -148,12 +145,11 @@ async def broadcast_forward(user_ids: list[int], message: Message) -> tuple[int,
                     f"📊 Progres: {i}/{len(user_ids)}"
                 )
             except Exception as e:
-                print(f"❗Holatni yangilash xatosi: {e}")
-
+                print(f"❗Forward holati xato: {e}")
     return success, failed
 
 
-# --- XATOLIKLARGA QARSHI XAVFSIZ COPY --- #
+# === XAVFSIZ COPY === #
 async def send_copy_safe(user_id: int, message: Message, retries=3) -> int:
     for attempt in range(retries):
         try:
@@ -172,7 +168,7 @@ async def send_copy_safe(user_id: int, message: Message, retries=3) -> int:
     return 0
 
 
-# --- XATOLIKLARGA QARSHI XAVFSIZ FORWARD --- #
+# === XAVFSIZ FORWARD === #
 async def send_forward_safe(user_id: int, message: Message, retries=3) -> int:
     for attempt in range(retries):
         try:
@@ -188,4 +184,4 @@ async def send_forward_safe(user_id: int, message: Message, retries=3) -> int:
         except Exception as e:
             print(f"❌ Forward error user_id={user_id} (attempt {attempt + 1}): {e}")
             await asyncio.sleep(1)
-    return 0 
+    return 0
