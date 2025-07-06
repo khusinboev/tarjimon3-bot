@@ -10,6 +10,7 @@ from config import dp, bot, adminStart, BASE_DIR
 from src.database.functions import create_all_base
 from src.middleware.middleware import RegisterUserMiddleware
 from src.user_handlers import start_handler, user_handler, tarjima, comunicate
+from src.handlers.admins.messages import msg_router
 from src.admin_handlers import panel
 
 router = Router()
@@ -36,6 +37,7 @@ async def main() -> None:
     dp.include_router(router)
     dp.include_router(start_handler.router)
     dp.include_router(panel.router)
+    dp.include_router(msg_router)
     # dp.include_router(comunicate.router)
     dp.include_router(user_handler.router)
     dp.include_router(tarjima.router)
