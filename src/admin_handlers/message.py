@@ -188,4 +188,4 @@ async def send_forward_safe(user_id: int, message: Message, retries=3) -> int:
         except Exception as e:
             print(f"❌ Forward error user_id={user_id} (attempt {attempt + 1}): {e}")
             await asyncio.sleep(1)
-    return 0
+    return 0 
