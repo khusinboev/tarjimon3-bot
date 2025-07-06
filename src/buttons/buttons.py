@@ -14,8 +14,8 @@ class AdminPanel:
                             KeyboardButton(text="📊Statistika"),
                             KeyboardButton(text="🔧Kanallar"),
                         ],
-                        # [
-                        #     KeyboardButton(text="📤Reklama"),
+                        [
+                             KeyboardButton(text="✍Xabarlar"),
                         #     KeyboardButton(text="♻️ Tozalash"),
                         # ]
                     ],
