@@ -42,16 +42,20 @@ class AdminPanel:
     @staticmethod
     async def admin_anons():
         admin_message=ReplyKeyboardMarkup(
-                    keyboard=[
-                        [
-                            KeyboardButton(text="📨Oddit forward"),
-                            KeyboardButton(text="📬Oddiy xabar"),
-                        ],
-                        [
-                            KeyboardButton(text="🔙Orqaga qaytish"),
-                        ]
+                keyboard=[
+                    [
+                        KeyboardButton(text="📨Forward xabar yuborish"),
+                        KeyboardButton(text="📬Oddiy xabar yuborish"),
                     ],
-                    resize_keyboard=True,
+                    [
+                        KeyboardButton(text="🧪Sinov: Copy yuborish"),
+                        KeyboardButton(text="🧪Sinov: Forward yuborish")
+                    ],
+                    [
+                        KeyboardButton(text="🔙Orqaga qaytish"),
+                    ]
+                ],
+                resize_keyboard=True,
                 )
         return admin_message
 
