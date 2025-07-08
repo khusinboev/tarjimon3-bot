@@ -21,8 +21,8 @@ class CheckData:
 
 class PanelFunc:
     @staticmethod
-    async def channel_add(chat_id):
-        sql.execute(f"INSERT INTO public.mandatorys( chat_id ) VALUES('{chat_id}');")
+    async def channel_add(chat_id, link):
+        sql.execute(f"INSERT INTO public.mandatorys( chat_id ) VALUES('{chat_id}', '{link}');")
         db.commit()
 
     @staticmethod
