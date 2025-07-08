@@ -14,37 +14,6 @@ async def create_all_base():
 )""")
     db.commit()
 
-    sql.execute("""CREATE TABLE IF NOT EXISTS public.channels
-(
-    id SERIAL NOT NULL,
-    chat_id bigint NOT NULL,
-    title character varying,
-    username character varying,
-    types character varying,
-    CONSTRAINT channels_pkey PRIMARY KEY (id)
-)""")
-    db.commit()
-
-    sql.execute("""CREATE TABLE IF NOT EXISTS public.groups
-(
-    id SERIAL NOT NULL,
-    chat_id bigint NOT NULL,
-    title character varying,
-    username character varying,
-    types character varying,
-    CONSTRAINT groups_pkey PRIMARY KEY (id)
-)""")
-    db.commit()
-
-    sql.execute("""CREATE TABLE IF NOT EXISTS public.group_langs
-(
-    chat_id bigint NOT NULL,
-    in_lang character varying(25) NOT NULL DEFAULT 'uz',
-    out_lang character varying NOT NULL DEFAULT 'en',
-    CONSTRAINT group_langs_pkey PRIMARY KEY (chat_id)
-)""")
-    db.commit()
-
     sql.execute("""CREATE TABLE IF NOT EXISTS public.mandatorys
         (
             id SERIAL NOT NULL,
