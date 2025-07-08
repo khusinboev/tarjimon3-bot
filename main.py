@@ -36,7 +36,7 @@ async def main() -> None:
     # Routerlar
     dp.include_router(router)
     dp.include_router(start_handler.router)
-    dp.include_router(panel.router)
+    dp.include_router(panel.admin_router)
     dp.include_router(msg_router)
     # dp.include_router(comunicate.router)
     dp.include_router(user_handler.router)
