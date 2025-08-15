@@ -35,7 +35,8 @@ async def check(call: CallbackQuery):
     try: await call.answer()
     except: pass
     try:
-        if await CheckData.check_member(bot, user_id):
+        check_status, channels = await CheckData.check_member(bot, user_id)
+        if check_status:
             await call.message.delete()
             await bot.send_message(chat_id=user_id, text="Choose languages", reply_markup=await UserPanels.main_manu())
         else:
