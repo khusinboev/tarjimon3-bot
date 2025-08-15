@@ -32,8 +32,6 @@ async def command_start_handler(message: Message) -> None:
 @router.callback_query(F.data == "check", F.message.chat.type == "private")
 async def check(call: CallbackQuery, botbek: Bot):
     user_id = call.from_user.id
-    try: await call.answer()
-    except: pass
     try:
         check_status, channels = await CheckData.check_member(botbek, user_id)
         if check_status:
