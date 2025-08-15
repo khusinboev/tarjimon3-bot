@@ -154,7 +154,8 @@ async def translator(message: Message, bot: Bot):
     user_id = message.from_user.id
 
     try:
-        if await CheckData.check_member(bot, message.from_user.id) or user_id in adminPanel:
+        check_status, channels = await CheckData.check_member(bot, user_id)
+        if check_status:
             lang_out, res_text = await text_translate(text=message.text, user_id=user_id)
             sql.execute(f"""SELECT tts FROM public.users_tts WHERE user_id={user_id}""")
             tts = sql.fetchone()[0]
@@ -185,97 +186,97 @@ async def translator(message: Message, bot: Bot):
         await bot.send_message(chat_id=adminStart, text=f"Error in translation: \n\n{ex}\n\n\n{message.from_user}")
 
 
-@router.message(F.content_type.in_([ContentType.VOICE, ContentType.AUDIO]), F.chat.type == "private")
-async def show_lang_list(message: Message, bot: Bot):
-    import asyncio
-    asyncio.create_task(audio_tr(message, bot))  # Asinxron vazifani fon jarayoniga o'tkazish
-
-async def audio_tr(message: Message, bot: Bot):
-    user_id = message.from_user.id
-    sent_msg = await bot.send_message(
-        chat_id=user_id,
-        text="Bu jarayon ko'proq vaqt olishi mumkin, kuting...\nWaiting a few seconds..."
-    )
-
-    if message.voice:
-        file_id = message.voice.file_id
-        file_format = "voice"
-        file_name = message.voice.file_unique_id
-    elif message.audio:
-        file_id = message.audio.file_id
-        file_format = "audio"
-        file_name = message.audio.file_unique_id
-
-    file_info = await bot.get_file(file_id)
-    file_path = file_info.file_path
-    downloaded_file = await bot.download_file(file_path)
-    temp_file_path = rf"{BASE_DIR}audio_tr/{file_name}.{file_format}"
-
-    with open(temp_file_path, "wb") as new_file:
-        new_file.write(downloaded_file.read())
-
-    if file_format == "voice":
-        audio = AudioSegment.from_ogg(temp_file_path)
-    else:
-        audio = AudioSegment.from_file(temp_file_path)
-
-    audio_name = rf"{BASE_DIR}audio_tr/{file_name}.wav"
-    audio.export(audio_name, format="wav")
-    os.remove(temp_file_path)
-
-    recognizer = sr.Recognizer()
-    with sr.AudioFile(audio_name) as source:
-        audio1 = recognizer.record(source)
-
-    sql.execute(f"""SELECT in_lang FROM public.user_langs WHERE user_id={user_id}""")
-    lang_in = sql.fetchone()[0]
-    exchangeLang = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🔄 Exchange Languages", callback_data="exchangeLang")],
-        [InlineKeyboardButton(text="👅 Langs", callback_data="lang_list")]
-    ])
-
-    try:
-        language_map = {
-        "uz": "uz-UZ",
-        "tr": "tr-TR",
-        "tg": "tg-TJ",
-        "en": "en-US",
-        "ja": "ja-JP",
-        "it": "it-IT",
-        "ru": "ru-RU",
-        "korean": "ko-KR",
-        "ar": "ar-SA",
-        "zh-CN": "zh-CN",
-        "fr": "fr-FR",
-        "de": "de-DE",
-        "hi": "hi-IN",
-        "az": "az-AZ",
-        "af": "af-ZA",
-        "kk": "kk-KZ",
-        "tk": "tk-TM",
-        "ky": "ky-KG",
-        "am": "am-ET",
-        "id": "id-ID",
-        "fa": "fa-IR",
-        "ug": "ug-CN",
-        "ur": "ur-PK",
-        "bn": "bn-BD",
-        }
-        text = recognizer.recognize_google(audio1, language=language_map[lang_in])
-        lang_in, lang_out, res_text, ikkili, off, simple = await text_translate(text=text, user_id=user_id)
-        if ikkili or simple:
-            for i in res_text:
-                await bot.send_message(chat_id=user_id, text=i, parse_mode="html", reply_markup=exchangeLang)
-        elif off:
-            res_text = res_text[0]
-            await bot.send_message(chat_id=user_id, text=res_text, parse_mode="html", reply_markup=exchangeLang)
-        else:
-            await bot.send_message(chat_id=user_id, text=f"<code>{res_text}</code>", parse_mode="html", reply_markup=exchangeLang)
-
-        await bot.delete_message(chat_id=sent_msg.chat.id, message_id=sent_msg.message_id)
-    except Exception as ex:
-        await bot.send_message(chat_id=user_id, text="Audio tushunarsiz!\n\nThe audio is unclear")
-        await bot.delete_message(chat_id=sent_msg.chat.id, message_id=sent_msg.message_id)
-        await bot.forward_message(chat_id=adminStart, from_chat_id=message.chat.id, message_id=message.message_id)
-        await bot.send_message(chat_id=adminStart, text=f"Error text: \n\n<code>{ex}</code>\n\n\n{message.chat}",
-                               parse_mode="html")
+# @router.message(F.content_type.in_([ContentType.VOICE, ContentType.AUDIO]), F.chat.type == "private")
+# async def show_lang_list(message: Message, bot: Bot):
+#     import asyncio
+#     asyncio.create_task(audio_tr(message, bot))  # Asinxron vazifani fon jarayoniga o'tkazish
+#
+# async def audio_tr(message: Message, bot: Bot):
+#     user_id = message.from_user.id
+#     sent_msg = await bot.send_message(
+#         chat_id=user_id,
+#         text="Bu jarayon ko'proq vaqt olishi mumkin, kuting...\nWaiting a few seconds..."
+#     )
+#
+#     if message.voice:
+#         file_id = message.voice.file_id
+#         file_format = "voice"
+#         file_name = message.voice.file_unique_id
+#     elif message.audio:
+#         file_id = message.audio.file_id
+#         file_format = "audio"
+#         file_name = message.audio.file_unique_id
+#
+#     file_info = await bot.get_file(file_id)
+#     file_path = file_info.file_path
+#     downloaded_file = await bot.download_file(file_path)
+#     temp_file_path = rf"{BASE_DIR}audio_tr/{file_name}.{file_format}"
+#
+#     with open(temp_file_path, "wb") as new_file:
+#         new_file.write(downloaded_file.read())
+#
+#     if file_format == "voice":
+#         audio = AudioSegment.from_ogg(temp_file_path)
+#     else:
+#         audio = AudioSegment.from_file(temp_file_path)
+#
+#     audio_name = rf"{BASE_DIR}audio_tr/{file_name}.wav"
+#     audio.export(audio_name, format="wav")
+#     os.remove(temp_file_path)
+#
+#     recognizer = sr.Recognizer()
+#     with sr.AudioFile(audio_name) as source:
+#         audio1 = recognizer.record(source)
+#
+#     sql.execute(f"""SELECT in_lang FROM public.user_langs WHERE user_id={user_id}""")
+#     lang_in = sql.fetchone()[0]
+#     exchangeLang = InlineKeyboardMarkup(inline_keyboard=[
+#         [InlineKeyboardButton(text="🔄 Exchange Languages", callback_data="exchangeLang")],
+#         [InlineKeyboardButton(text="👅 Langs", callback_data="lang_list")]
+#     ])
+#
+#     try:
+#         language_map = {
+#         "uz": "uz-UZ",
+#         "tr": "tr-TR",
+#         "tg": "tg-TJ",
+#         "en": "en-US",
+#         "ja": "ja-JP",
+#         "it": "it-IT",
+#         "ru": "ru-RU",
+#         "korean": "ko-KR",
+#         "ar": "ar-SA",
+#         "zh-CN": "zh-CN",
+#         "fr": "fr-FR",
+#         "de": "de-DE",
+#         "hi": "hi-IN",
+#         "az": "az-AZ",
+#         "af": "af-ZA",
+#         "kk": "kk-KZ",
+#         "tk": "tk-TM",
+#         "ky": "ky-KG",
+#         "am": "am-ET",
+#         "id": "id-ID",
+#         "fa": "fa-IR",
+#         "ug": "ug-CN",
+#         "ur": "ur-PK",
+#         "bn": "bn-BD",
+#         }
+#         text = recognizer.recognize_google(audio1, language=language_map[lang_in])
+#         lang_in, lang_out, res_text, ikkili, off, simple = await text_translate(text=text, user_id=user_id)
+#         if ikkili or simple:
+#             for i in res_text:
+#                 await bot.send_message(chat_id=user_id, text=i, parse_mode="html", reply_markup=exchangeLang)
+#         elif off:
+#             res_text = res_text[0]
+#             await bot.send_message(chat_id=user_id, text=res_text, parse_mode="html", reply_markup=exchangeLang)
+#         else:
+#             await bot.send_message(chat_id=user_id, text=f"<code>{res_text}</code>", parse_mode="html", reply_markup=exchangeLang)
+#
+#         await bot.delete_message(chat_id=sent_msg.chat.id, message_id=sent_msg.message_id)
+#     except Exception as ex:
+#         await bot.send_message(chat_id=user_id, text="Audio tushunarsiz!\n\nThe audio is unclear")
+#         await bot.delete_message(chat_id=sent_msg.chat.id, message_id=sent_msg.message_id)
+#         await bot.forward_message(chat_id=adminStart, from_chat_id=message.chat.id, message_id=message.message_id)
+#         await bot.send_message(chat_id=adminStart, text=f"Error text: \n\n<code>{ex}</code>\n\n\n{message.chat}",
+#                                parse_mode="html")
