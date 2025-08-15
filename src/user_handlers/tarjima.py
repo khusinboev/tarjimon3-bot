@@ -154,7 +154,7 @@ async def translator(message: Message, bot: Bot):
     user_id = message.from_user.id
 
     try:
-        if await CheckData.check_on_start(message.chat.id) or user_id in adminPanel:
+        if await CheckData.check_member(bot, message.from_user.id) or user_id in adminPanel:
             lang_out, res_text = await text_translate(text=message.text, user_id=user_id)
             sql.execute(f"""SELECT tts FROM public.users_tts WHERE user_id={user_id}""")
             tts = sql.fetchone()[0]

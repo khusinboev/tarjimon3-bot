@@ -17,7 +17,7 @@ async def command_start_handler(message: Message) -> None:
     await bot.send_chat_action(chat_id=message.from_user.id, action=ChatAction.TYPING)
     await Authenticator.auth_user(message)
     try:
-        if await CheckData.check_on_start(message.from_user.id):
+        if await CheckData.check_member(bot, message.from_user.id):
             await message.answer(
                 text="Xush kelibsiz\n\n\nWelcome to my bot", reply_markup=await UserPanels.main_manu())
         else:
@@ -35,7 +35,7 @@ async def check(call: CallbackQuery):
     try: await call.answer()
     except: pass
     try:
-        if await CheckData.check_on_start(user_id):
+        if await CheckData.check_member(bot, user_id):
             await call.message.delete()
             await bot.send_message(chat_id=user_id, text="Choose languages", reply_markup=await UserPanels.main_manu())
         else:
