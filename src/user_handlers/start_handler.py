@@ -1,4 +1,4 @@
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.filters import CommandStart
 from aiogram.types import Message, CallbackQuery
 from aiogram.enums import ChatAction, ChatType
@@ -30,12 +30,12 @@ async def command_start_handler(message: Message) -> None:
 
 
 @router.callback_query(F.data == "check", F.message.chat.type == "private")
-async def check(call: CallbackQuery):
+async def check(call: CallbackQuery, botbek: Bot):
     user_id = call.from_user.id
     try: await call.answer()
     except: pass
     try:
-        check_status, channels = await CheckData.check_member(bot, user_id)
+        check_status, channels = await CheckData.check_member(botbek, user_id)
         if check_status:
             await call.message.delete()
             await bot.send_message(chat_id=user_id, text="Choose languages", reply_markup=await UserPanels.main_manu())
